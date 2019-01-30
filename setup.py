@@ -10,5 +10,15 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
+    install_requires=[
+        'gps==3.9',
+        'Flask==1.0.2',
+        'Flask-Classful==0.14.2',
+        'singleton-decorator==1.0.0',
+        'numpy==1.16.0',
+        'simple_pid==0.1.4',
+        'pyserial==3.4',
+        'Adafruit-BNO055==1.0.2',
+        ]
 )
 
