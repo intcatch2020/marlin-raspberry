@@ -79,6 +79,7 @@ class MotorController:
 
     def update_loop(self):
         while not self.stop:
-            self.set_engine_state(self.RC.state['trust'],
-                                  self.RC.state['turn'],
-                                  self.RC.state['scale'])
+            state = self.RC.get_state()
+            self.set_engine_state(state['trust'],
+                                  state['turn'],
+                                  state['scale'])

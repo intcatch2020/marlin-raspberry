@@ -29,11 +29,14 @@ class RC:
             self.logger.debug(e)
 
     def rc_to_motor_signal(x):
-        # ensure value between -500 and 500
         signal = (x - 990) * 0.61
 
         # remove noise from rest position
         if abs(signal) < 6:
             signal = 0
 
+        # ensure value between -500 and 500
         return clip(signal, -500, 500)
+
+    def get_state(self):
+        return self.state
