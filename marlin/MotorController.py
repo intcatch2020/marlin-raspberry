@@ -20,7 +20,7 @@ class MotorController:
         self.logger = logging.getLogger(__name__)
         self.left_motor = None
         self.right_motor = None
-        self.RC = Provider().get_RC()
+        self.controllers = [Provider().get_RC(), Provider().get_Autonomy()]
         self.Autonomy = None  # Provider.getAutonomy
         if IS_PI:
             self.pi = pigpio.pi()
@@ -79,7 +79,14 @@ class MotorController:
 
     def update_loop(self):
         while not self.stop:
-            state = self.RC.get_state()
-            self.set_engine_state(state['trust'],
-                                  state['turn'],
-                                  state['scale'])
+            active_controller = False
+            for controller in self.controllers:
+                if controller.is_active():
+                    state = controller.get_state()
+                    self.set_engine_state(state['trust'],
+                                          state['turn'],
+                                          state['scale'])
+                    active_controller = True
+            if not active_controller:
+                    self.set_engine_state(0, 0, 0)
+            time.sleep(1)

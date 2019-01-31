@@ -1,10 +1,8 @@
 import logging
-import time
 import numpy as np
 
-from threading import Thread
 from marlin.Provider import Provider
-from marlin.utils import closestPointOnLine, directionError, angleToDirection
+from marlin.utils import closestPointOnLine, directionError
 from marlin.utils import clip, headingToVector
 from simple_pid import PID
 
@@ -42,10 +40,13 @@ class Autonomy:
     def stop(self):
         self.is_running = False
 
+    def is_active(self):
+        return self.is_running
+
     def get_state(self):
         # if not runninf or reached last point
 
-        boat_position = np.array(self.GPS.state['lat'], self.GPS.state['lon'])
+        boat_position = np.array(self.GPS.state['lat'], self.GPS.state['lng'])
         boat_position *= COORDINATE_SCALE
 
         # if next point is close the boat, reapeat this with successive point

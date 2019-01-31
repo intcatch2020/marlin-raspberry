@@ -3,7 +3,7 @@ import logging
 import json
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from marlin.Boat import Boat
 from marlin.Provider import Provider
