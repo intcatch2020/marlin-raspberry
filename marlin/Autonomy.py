@@ -46,7 +46,9 @@ class Autonomy:
     def get_state(self):
         # if not runninf or reached last point
 
-        boat_position = np.array(self.GPS.state['lat'], self.GPS.state['lng'])
+        boat_position = np.array(
+                [self.GPS.state['lat'], self.GPS.state['lng']],
+                dtype=np.float32)
         boat_position *= COORDINATE_SCALE
 
         # if next point is close the boat, reapeat this with successive point
