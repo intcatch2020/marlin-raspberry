@@ -14,7 +14,7 @@ class Autonomy:
         self.logger = logging.getLogger(__name__)
         self.is_running = False
         self.pid = (-1, 0, 0.5)
-        self.coordinates = []
+        self.coordinates = np.array([])
         self.next_target = 0
         self.loop_thread = None
         self.pid_controller = PID(*self.pid)
@@ -34,6 +34,11 @@ class Autonomy:
         self.speed = speed
 
     def start(self):
+        boat_position = np.array(
+                [self.GPS.state['lat'], self.GPS.state['lng']],
+                dtype=np.float32)*COORDINATE_SCALE
+        self.coordinates = np.insert(self.coordinates, 0,
+                                     boat_position, axis=0)
         self.is_running = True
         self.pid_controller = PID(*self.pid)
 
@@ -55,6 +60,7 @@ class Autonomy:
         while True:
             # check that boat is running and there are point left
             if not self.is_running or self.next_target >= len(self.coordinates):
+                self.logger.info('Last waypoint reached')
                 self.is_running = False
                 return {'trust': 0, 'turn': 0, 'scale': 0}
 
