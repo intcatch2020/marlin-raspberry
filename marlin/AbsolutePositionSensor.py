@@ -22,7 +22,6 @@ class AbsolutePositionSensor:
             'mag_cal': 0
         }
         self.stop = False
-        return
         self.sensor = BNO055.BNO055(serial_port=port, rst=rst)
         self.setup()
         self.loop_thread = Thread(target=self.update_loop)
@@ -54,6 +53,7 @@ class AbsolutePositionSensor:
         while not self.stop:
             (self.state['heading'], self.state['roll'],
              self.state['pitch']) = self.sensor.read_euler()
+            self.state['heading'] = (self.state['heading']+90) % 360
             (self.state['sys_cal'], self.state['gyro_cal'],
              self.state['accel_cal'],
              self.state['mag_cal']) = self.sensor.get_calibration_status()

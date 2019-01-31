@@ -29,3 +29,7 @@ def directionError(position, goal, direction):
     err = np.arccos(np.dot(d1, direction))*2/np.pi
     err *= np.sign(np.cross(d1, direction))
     return err
+
+def headingToVector(heading):
+    rad = heading*np.pi/180
+    return np.array(np.cos(rad), np.sin(rad))

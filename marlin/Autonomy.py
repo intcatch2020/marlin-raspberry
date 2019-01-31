@@ -5,6 +5,7 @@ import numpy as np
 from threading import Thread
 from marlin.Provider import Provider
 from marlin.utils import closestPointOnLine, directionError, angleToDirection
+from marlin.utils import clip, headingToVector
 from simple_pid import PID
 
 COORDINATE_SCALE = 100000
@@ -57,7 +58,7 @@ class Autonomy:
             # take first two points
             i = min(self.next_target, 1)
             target_position, line_fraction = closestPointOnLine(
-                    self.coordinates[i-1], 
+                    self.coordinates[i-1],
                     self.coordinates[i],
                     boat_position, 1)
 
@@ -67,14 +68,10 @@ class Autonomy:
             else:
                 break
 
-
-                
-
-
-        boat_direction = angleToDirection(self.APS.state['heading'])
+        boat_direction = headingToVector(self.APS.state['heading'])
         error = directionError(boat_position, target_position, boat_direction)
         correction = self.pid_controller(error)
-        
+
         # if boat is point in opposite direction turn on the spot
         trust = 500 if abs(error) < 1 else 0
         turn = 500 * clip(correction, -1, 1)
