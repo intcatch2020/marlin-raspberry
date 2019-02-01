@@ -90,4 +90,4 @@ class MotorController:
                     break
             if not active_controller:
                     self.set_engine_state(0, 0, 0)
-            time.sleep(1)
+            time.sleep(0.05)
