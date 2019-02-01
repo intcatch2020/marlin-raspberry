@@ -14,7 +14,7 @@ class RC:
         self.state = {
             'trust': 0,  # throttle (1000-2000)
             'turn': 0,  # turn (1000-2000)
-            'override': True,  # RC override
+            'override': False,  # RC override
             'scale': 0,  # throttle scale (0-1)
         }
 
