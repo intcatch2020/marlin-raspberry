@@ -31,7 +31,7 @@ class HttpController(FlaskView):
             response.status_code = 503
             return response
 
-    @route('/stop_autonomy')
+    @route('/stop_autonomy', methods=['POST'])
     def stop_autonomy(self):
         if self.boat.stop_autonomy():
             return jsonify({'status': 'OK'})
