@@ -87,6 +87,7 @@ class MotorController:
                                           state['turn'],
                                           state['scale'])
                     active_controller = True
+                    break
             if not active_controller:
                     self.set_engine_state(0, 0, 0)
             time.sleep(1)
