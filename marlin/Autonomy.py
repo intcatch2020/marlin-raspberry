@@ -1,12 +1,11 @@
 import logging
 import numpy as np
+import utm
 
 from marlin.Provider import Provider
 from marlin.utils import closestPointOnLine, directionError
 from marlin.utils import clip, headingToVector
 from simple_pid import PID
-
-COORDINATE_SCALE = 100000
 
 
 class Autonomy:
@@ -24,7 +23,14 @@ class Autonomy:
         self.speed = 30
 
     def set_coordinates(self, coordinates):
-        self.coordinates = np.array(coordinates)*COORDINATE_SCALE
+        boat_position = utm.from_latlon(self.GPS.state['lat'],
+                                        self.GPS.state['lng'])[:2]
+        self.coordinates = [boat_position]
+        for lat, lng in coordinates:
+            c = utm.from_latlon(lat, lng)[:2]
+            self.coordinates.append(c)
+
+        self.coordinates = np.array(coordinates)
         self.next_target = 1
 
     def set_pid(self, pid):
@@ -34,11 +40,14 @@ class Autonomy:
         self.speed = speed
 
     def start(self):
-        boat_position = np.array(
-                [self.GPS.state['lat'], self.GPS.state['lng']],
-                dtype=np.float32)*COORDINATE_SCALE
-        self.coordinates = np.insert(self.coordinates, 0,
-                                     boat_position, axis=0)
+        boat_position = utm.from_latlon(self.GPS.state['lat'],
+                                        self.GPS.state['lng'])[:2]
+
+        # if we need to go to first waypoint create line from current position
+        # to the waypoint
+        if self.next_target == 1:
+            self.coordinates[0] = boat_position
+
         self.is_running = True
         self.pid_controller = PID(*self.pid)
 
@@ -51,11 +60,8 @@ class Autonomy:
     def get_state(self):
         # if not runninf or reached last point
 
-        boat_position = np.array(
-                [self.GPS.state['lat'], self.GPS.state['lng']],
-                dtype=np.float32)
-        self.logger.info(boat_position)
-        boat_position *= COORDINATE_SCALE
+        boat_position = utm.from_latlon(self.GPS.state['lat'],
+                                        self.GPS.state['lng'])[:2]
 
         # if next point is close the boat, reapeat this with successive point
         while True:
@@ -79,6 +85,10 @@ class Autonomy:
                 break
 
         boat_direction = headingToVector(self.APS.state['heading'])
+        self.logger.debug(
+            'position: {} direction: {} waypoint: {}, number {}'.format(
+                boat_position, boat_direction, self.coordinates[i], i))
+
         error = directionError(boat_position, target_position, boat_direction)
         correction = self.pid_controller(error)
 

@@ -19,6 +19,7 @@ setuptools.setup(
         'simple_pid==0.1.4',
         'pyserial==3.4',
         'Adafruit-BNO055==1.0.2',
+        'utm==0.4.2'
         ]
 )
 

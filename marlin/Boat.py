@@ -32,7 +32,7 @@ class Boat:
             path = data['path']
             coordinates = []
             for coordinate in path:
-                coordinates.append([coordinate['lng'], coordinate['lat']])
+                coordinates.append([coordinate['lat'], coordinate['lng']])
             self.autonomy.set_coordinates(np.array(coordinates))
             self.autonomy.start()
             return True
