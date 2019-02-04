@@ -21,7 +21,7 @@ class Autonomy:
         self.GPS = Provider().get_GPS()
         self.APS = Provider().get_AbsolutePositionSensor()
         self.offset = 1
-        self.speed = 100
+        self.speed = 30
 
     def set_coordinates(self, coordinates):
         self.coordinates = np.array(coordinates)*COORDINATE_SCALE
@@ -54,6 +54,7 @@ class Autonomy:
         boat_position = np.array(
                 [self.GPS.state['lat'], self.GPS.state['lng']],
                 dtype=np.float32)
+        self.logger.info(boat_position)
         boat_position *= COORDINATE_SCALE
 
         # if next point is close the boat, reapeat this with successive point
