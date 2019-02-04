@@ -39,9 +39,6 @@ class MotorController:
             self.pi.set_pull_up_down(LEFT_MOTOR_PIN, pigpio.PUD_OFF)
 
     def set_engine_state(self, speed, turn, scale):
-        self.logger.debug('speed: {}, turn: {}, scale: {}'.format(
-            speed, turn, scale))
-
         l_speed = r_speed = speed
         l_speed += turn / 2
         r_speed -= turn / 2
@@ -59,10 +56,6 @@ class MotorController:
         r_speed = (r_speed - offset) * scale + 1500
         l_speed = clip(l_speed, 1000, 2000)
         r_speed = clip(r_speed, 1000, 2000)
-
-        self.logger.debug(
-            'l_speed: {}, r_speed: {}, offset: {}, scale: {}'.format(
-                l_speed, r_speed, offset, scale))
 
         if IS_PI:
             self.pi.set_servo_pulsewidth(LEFT_MOTOR_PIN, l_speed)

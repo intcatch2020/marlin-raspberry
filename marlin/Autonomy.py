@@ -30,7 +30,7 @@ class Autonomy:
             c = utm.from_latlon(lat, lng)[:2]
             self.coordinates.append(c)
 
-        self.coordinates = np.array(coordinates)
+        self.coordinates = np.array(self.coordinates)
         self.next_target = 1
 
     def set_pid(self, pid):

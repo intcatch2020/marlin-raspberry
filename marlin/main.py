@@ -4,6 +4,7 @@ import json
 
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger('Adafruit_BNO055.BNO055').setLevel(logging.INFO)
 
 from marlin.Boat import Boat
 from marlin.Provider import Provider

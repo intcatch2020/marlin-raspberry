@@ -57,7 +57,6 @@ class AbsolutePositionSensor:
             (self.state['sys_cal'], self.state['gyro_cal'],
              self.state['accel_cal'],
              self.state['mag_cal']) = self.sensor.get_calibration_status()
-            self.logger.debug(self.state)
 
             # read sensor every SENSOR_UDPDATE_TIME_S
             time.sleep(time.time() % self.SENSOR_UDPDATE_TIME_S)

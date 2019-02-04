@@ -33,4 +33,4 @@ def directionError(position, goal, direction):
 
 def headingToVector(heading):
     rad = heading*np.pi/180
-    return np.array([np.cos(rad), np.sin(rad)])
+    return np.array([np.sin(rad), np.cos(rad)])
