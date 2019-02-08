@@ -72,7 +72,7 @@ class Autonomy:
                 return {'trust': 0, 'turn': 0, 'scale': 0}
 
             # take first two points
-            i = min(self.next_target, 1)
+            i = max(self.next_target, 1)
             target_position, line_fraction = closestPointOnLine(
                     self.coordinates[i-1],
                     self.coordinates[i],
