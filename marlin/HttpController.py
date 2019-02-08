@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, request
 from flask_classful import FlaskView, route
 from marlin.Provider import Provider
 
 VERSION = "0.0.1"
+
 
 
 class HttpController(FlaskView):
@@ -17,23 +18,27 @@ class HttpController(FlaskView):
     def state(self):
         return jsonify(self.boat.get_state())
 
-    @route('/start_autonomy')
+    @route('/start_autonomy', methods=['POST'])
     def start_autonomy(self):
-        if self.boat.start_autonomy():
-            return make_response('OK')
-        else:
-            return make_response('ERROR', 503)
+        data = request.get_json()
 
-    @route('/stop_autonomy')
+        # TODO use json schema to validate
+
+        if 'path' in data and self.boat.start_autonomy(data):
+            return jsonify({'status': 'OK'})
+        else:
+            response = jsonify({'status': 'ERROR'})
+            response.status_code = 503
+            return response
+
+    @route('/stop_autonomy', methods=['POST'])
     def stop_autonomy(self):
         if self.boat.stop_autonomy():
-            return make_response('OK')
+            return jsonify({'status': 'OK'})
         else:
-            return make_response('ERROR', 503)
-
-    @route('/test/')
-    def test(self):
-        return 'test'
+            response = jsonify({'status': 'ERROR'})
+            response.status_code = 503
+            return response
 
 
 if __name__ == '__main__':

@@ -37,6 +37,10 @@ class Provider:
         HttpController.register(app)
         return app
 
+    def get_Autonomy(self):
+        from marlin.Autonomy import Autonomy
+        return self._get_instace('Autonomy', Autonomy)
+
     def _get_instace(self, key, cls, *args, **kwargs):
         if key not in self.instances:
             self.instances[key] = cls(*args, **kwargs)

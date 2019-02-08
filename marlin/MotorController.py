@@ -20,7 +20,7 @@ class MotorController:
         self.logger = logging.getLogger(__name__)
         self.left_motor = None
         self.right_motor = None
-        self.RC = Provider().get_RC()
+        self.controllers = [Provider().get_RC(), Provider().get_Autonomy()]
         self.Autonomy = None  # Provider.getAutonomy
         if IS_PI:
             self.pi = pigpio.pi()
@@ -39,9 +39,6 @@ class MotorController:
             self.pi.set_pull_up_down(LEFT_MOTOR_PIN, pigpio.PUD_OFF)
 
     def set_engine_state(self, speed, turn, scale):
-        self.logger.debug('speed: {}, turn: {}, scale: {}'.format(
-            speed, turn, scale))
-
         l_speed = r_speed = speed
         l_speed += turn / 2
         r_speed -= turn / 2
@@ -60,10 +57,6 @@ class MotorController:
         l_speed = clip(l_speed, 1000, 2000)
         r_speed = clip(r_speed, 1000, 2000)
 
-        self.logger.debug(
-            'l_speed: {}, r_speed: {}, offset: {}, scale: {}'.format(
-                l_speed, r_speed, offset, scale))
-
         if IS_PI:
             self.pi.set_servo_pulsewidth(LEFT_MOTOR_PIN, l_speed)
             self.pi.set_servo_pulsewidth(RIGHT_MOTOR_PIN, r_speed)
@@ -79,6 +72,15 @@ class MotorController:
 
     def update_loop(self):
         while not self.stop:
-            self.set_engine_state(self.RC.state['trust'],
-                                  self.RC.state['turn'],
-                                  self.RC.state['scale'])
+            active_controller = False
+            for controller in self.controllers:
+                if controller.is_active():
+                    state = controller.get_state()
+                    self.set_engine_state(state['trust'],
+                                          state['turn'],
+                                          state['scale'])
+                    active_controller = True
+                    break
+            if not active_controller:
+                    self.set_engine_state(0, 0, 0)
+            time.sleep(0.05)

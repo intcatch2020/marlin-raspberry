@@ -21,3 +21,16 @@ def closestPointOnLine(a, b, p, offset=0):
     scale = np.dot(result - a, ab) / np.dot(ab, ab)
 
     return result, scale
+
+
+def directionError(position, goal, direction):
+    d1 = goal - position
+    d1 = d1/np.linalg.norm(d1)
+    err = np.arccos(np.dot(d1, direction))*2/np.pi
+    err *= np.sign(np.cross(d1, direction))
+    return err
+
+
+def headingToVector(heading):
+    rad = heading*np.pi/180
+    return np.array([np.sin(rad), np.cos(rad)])
