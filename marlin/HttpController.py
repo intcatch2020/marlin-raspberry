@@ -40,6 +40,16 @@ class HttpController(FlaskView):
             response.status_code = 503
             return response
 
+    @route('/speed', methods=['POST'])
+    def set_speed(self):
+        data = request.get_json()
+        if self.boat.set_speed(data):
+            return jsonify({'status': 'OK'})
+        else:
+            response = jsonify({'status': 'ERROR'})
+            response.status_code = 503
+            return response
+
 
 if __name__ == '__main__':
     h = HttpController()

@@ -23,6 +23,8 @@ class Boat:
         state = {'sensors': [],
                  'GPS': self.GPS.state,
                  'APS': self.APS.state,
+                 'driving_mode': self.motor_controller.driving_mode,
+                 'autonomy_speed': self.autonomy.speed
                  }
         for sensor in self.sensors:
             sensor_state = sensor.get_state()
@@ -49,3 +51,14 @@ class Boat:
     def stop_autonomy(self):
         self.autonomy.stop()
         return True
+
+    def set_speed(self, data):
+        try:
+            speed = float(data['speed'])
+            self.autonomy.set_speed(speed)
+            return True
+        except KeyError as e:
+            self.logger.warning(e)
+        except ValueError as e:
+            self.logger.warning(e)
+        return False

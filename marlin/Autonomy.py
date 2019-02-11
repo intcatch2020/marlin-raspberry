@@ -21,6 +21,7 @@ class Autonomy:
         self.APS = Provider().get_AbsolutePositionSensor()
         self.offset = 1
         self.speed = 30
+        self.name = 'autonomy'
 
     def set_coordinates(self, coordinates):
         boat_position = utm.from_latlon(self.GPS.state['lat'],
@@ -37,7 +38,8 @@ class Autonomy:
         self.pid = pid
 
     def set_speed(self, speed):
-        self.speed = speed
+        self.speed = clip(speed, 0, 100)
+        self.logger.info('set speed to '+str(self.speed))
 
     def start(self):
         boat_position = utm.from_latlon(self.GPS.state['lat'],

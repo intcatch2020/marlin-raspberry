@@ -22,6 +22,7 @@ class AbsolutePositionSensor:
             'mag_cal': 0
         }
         self.stop = False
+        return
         self.sensor = BNO055.BNO055(serial_port=port, rst=rst)
         self.setup()
         self.loop_thread = Thread(target=self.update_loop)
