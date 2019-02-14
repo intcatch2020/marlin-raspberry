@@ -26,7 +26,7 @@ class MotorController:
             self.pi = pigpio.pi()
         self.on = False
         self.stop = False
-        self.driving_mode = None
+        self.driving_mode = -1
         self.setup()
         self.turn_on()
         self.loop_thread = Thread(target=self.update_loop)
@@ -74,15 +74,16 @@ class MotorController:
     def update_loop(self):
         while not self.stop:
             active_controller = False
-            for controller in self.controllers:
+            for i, controller in enumerate(self.controllers):
                 if controller.is_active():
                     state = controller.get_state()
                     self.set_engine_state(state['trust'],
                                           state['turn'],
                                           state['scale'])
                     active_controller = True
-                    self.driving_mode = controller.name
+                    self.driving_mode = i
                     break
             if not active_controller:
                     self.set_engine_state(0, 0, 0)
+                    self.driving_mode = -1
             time.sleep(0.05)
