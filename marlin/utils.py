@@ -34,3 +34,7 @@ def directionError(position, goal, direction):
 def headingToVector(heading):
     rad = heading*np.pi/180
     return np.array([np.sin(rad), np.cos(rad)])
+
+class SensorExistsException(Exception):
+    def __init__(self, sensor_name):
+        super().__init__('sensor {} already exists'.format(sensor_name))

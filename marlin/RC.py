@@ -11,10 +11,11 @@ class RC:
         self.asp = Provider().get_ArduinoSerialParser()
         self.asp.add_sensor('RC', self.set_state)
         self.listeners = set()
+        self.name = 'RC'
         self.state = {
             'trust': 0,  # throttle (1000-2000)
             'turn': 0,  # turn (1000-2000)
-            'override': False,  # RC override
+            'override': True,  # RC override
             'scale': 0,  # throttle scale (0-1)
         }
 

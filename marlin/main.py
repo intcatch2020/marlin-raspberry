@@ -3,7 +3,11 @@ import logging
 import json
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO,
+                    handlers=[
+                        logging.FileHandler("{0}/{1}.log".format('/tmp/', 'boat')),
+                        logging.StreamHandler()])
 logging.getLogger('Adafruit_BNO055.BNO055').setLevel(logging.INFO)
 
 from marlin.Boat import Boat

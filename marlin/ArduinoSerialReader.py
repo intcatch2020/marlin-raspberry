@@ -4,12 +4,10 @@ import json
 import time
 
 from threading import Thread
+from marlin.utils import SensorExistsException
 logging.basicConfig(level=logging.DEBUG)
 
 
-class SensorExistsException(Exception):
-    def __init__(self, sensor_name):
-        super().__init__('sensor {} already exists'.format(sensor_name))
 
 
 class ArduinoSerialReader:
@@ -47,28 +45,17 @@ class ArduinoSerialReader:
         line = ''
         while not self.stop:
             try:
-                buffer = self.serial_connection.read(
-                    self.serial_connection.inWaiting())
-                buffer = buffer.decode()
+                line = self.serial_connection.readline().decode()
+                data = json.loads(line)
+                self._notify_sensor(data['sensor'], data['data'])
+            except json.JSONDecodeError as e:
+                self.logger.debug(e)
+            except KeyError as e:
+                self.logger.debug(e)
+            except TypeError as e:
+                self.logger.debug(e)
             except UnicodeDecodeError as e:
                 self.logger.debug(e)
-                continue
-
-            splits = buffer.split('\n')
-            line += splits[0]
-
-            for split in splits[1:]:
-                try:
-                    data = json.loads(line)
-                    self._notify_sensor(data['sensor'], data['data'])
-                except json.JSONDecodeError as e:
-                    self.logger.debug(e)
-                except KeyError as e:
-                    self.logger.debug(e)
-                except TypeError as e:
-                    self.logger.debug(e)
-
-                line = split
 
     def close(self):
         self.stop = True

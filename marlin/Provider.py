@@ -24,8 +24,8 @@ class Provider:
 
     def get_AbsolutePositionSensor(self):
         from marlin.AbsolutePositionSensor import AbsolutePositionSensor
-        return self._get_instace('APS', AbsolutePositionSensor, '/dev/serial0',
-                                 None)
+        return self._get_instace(
+                'APS', AbsolutePositionSensor, '/dev/serial0', None)
 
     def get_Boat(self):
         from marlin.Boat import Boat
@@ -40,6 +40,11 @@ class Provider:
     def get_Autonomy(self):
         from marlin.Autonomy import Autonomy
         return self._get_instace('Autonomy', Autonomy)
+
+    def get_BlueBoxReader(self):
+        from marlin.BlueBox import BlueBoxReader
+        return self._get_instace(
+                'BlueBoxReader', BlueBoxReader, '/dev/bluebox')
 
     def _get_instace(self, key, cls, *args, **kwargs):
         if key not in self.instances:
