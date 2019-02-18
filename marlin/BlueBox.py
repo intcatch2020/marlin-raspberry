@@ -53,6 +53,11 @@ class BlueBoxReader:
             except TypeError as e:
                 self.logger.debug(e)
 
+    def write(self, data):
+        if data[-1] != '\n':
+            data += '\n'
+        self.serial_connection.write(data.encode())
+
     def close(self):
         self.stop = True
         self.logger.info('waiting for serial to close')
@@ -70,6 +75,9 @@ class SensorType(Enum):
     EC_T = 'Temperature EC'
     DO = 'Oxygen'
     DO_T = 'Temperature O2'
+    PRESSURE = 'Pressure'
+
+# pump on = 'Pumpe 1'
 
 
 class BlueBoxSensor:
@@ -77,7 +85,8 @@ class BlueBoxSensor:
              SensorType.EC: 'uS',
              SensorType.EC_T: 'C',
              SensorType.DO_T: 'C',
-             SensorType.DO: 'mg/l'}
+             SensorType.DO: 'mg/l',
+             SensorType.PRESSURE: 'bar'}
 
     def __init__(self, sensor_type):
         self.value = None
@@ -98,14 +107,46 @@ class BlueBoxSensor:
                 'unit': self.unit}
 
 
+class BlueBoxPump:
+    def __init__(self):
+        self.speed = 0
+        self.active = False
+        self.bluebox = Provider().get_BlueBoxReader()
+        self.bluebox.add_sensor('Pumpe 1', self.update_speed)
+        self.timer = 0
+
+    def update_speed(self, speed):
+        self.speed = speed
+        self.check_timer()
+        if self.active != bool(self.speed):
+            self.set_pump_state(self.active)
+
+    def check_timer(self):
+        if self.timer != 0 and self.timer < time.time():
+            self.active = False
+            self.timer = 0
+
+    def set_timer(self, duration_sec):
+        self.timer = time.time() + duration_sec
+
+    def set_pump_state(self, active):
+        self.active = active
+        self.bluebox.write('$PGO02,pump_on,{}\n'.format(int(self.active)))
+
+    def get_state(self):
+        return {'active': self.active,
+                'speed': self.speed,
+                'time': max(0, self.timer - time.time())}
+
+
 if __name__ == '__main__':
     import time
     ss = [BlueBoxSensor(SensorType.PH), BlueBoxSensor(SensorType.DO),
-            BlueBoxSensor(SensorType.EC), BlueBoxSensor(SensorType.EC_T),
-            BlueBoxSensor(SensorType.DO_T)]
+          BlueBoxSensor(SensorType.EC), BlueBoxSensor(SensorType.EC_T),
+          BlueBoxSensor(SensorType.DO_T), BlueBoxPump()]
+    ss[-1].set_pump_state(True)
+    ss[-1].set_timer(20)
     while 1:
         for s in ss:
             print(s.get_state())
         time.sleep(1)
-
-
