@@ -1,5 +1,6 @@
 import logging
 import serial
+import time
 
 from enum import Enum
 from threading import Thread
@@ -77,8 +78,6 @@ class SensorType(Enum):
     DO_T = 'Temperature O2'
     PRESSURE = 'Pressure'
 
-# pump on = 'Pumpe 1'
-
 
 class BlueBoxSensor:
     UNITS = {SensorType.PH: 'mg/l',
@@ -127,10 +126,13 @@ class BlueBoxPump:
             self.timer = 0
 
     def set_timer(self, duration_sec):
+        if duration_sec == 0:
+            self.timer = 0
+            return
         self.timer = time.time() + duration_sec
 
     def set_pump_state(self, active):
-        self.active = active
+        self.active = bool(active)
         self.bluebox.write('$PGO02,pump_on,{}\n'.format(int(self.active)))
 
     def get_state(self):
