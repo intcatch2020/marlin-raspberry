@@ -3,7 +3,8 @@ import numpy as np
 
 from marlin.MotorController import MotorController
 from marlin.Provider import Provider
-from marlin.BlueBox import BlueBoxSensor, SensorType, BlueBoxReader
+from marlin.BlueBox import BlueBoxSensor, SensorType
+from marlin.BlueBox import BlueBoxPump
 from marlin.Battery import Battery
 
 
@@ -16,7 +17,9 @@ class Boat:
                         BlueBoxSensor(SensorType.DO),
                         BlueBoxSensor(SensorType.EC),
                         BlueBoxSensor(SensorType.DO_T),
+                        BlueBoxSensor(SensorType.Pressure),
                         Battery()]
+        self.pump = BlueBoxPump()
         self.motor_controller = MotorController()
         self.autonomy = Provider().get_Autonomy()
 
@@ -27,10 +30,12 @@ class Boat:
                  'driving_mode': self.motor_controller.driving_mode,
                  'autonomy_speed': self.autonomy.speed
                  }
+
         for sensor in self.sensors:
             sensor_state = sensor.get_state()
             if sensor_state is not None:
                 state['sensors'].append(sensor_state)
+
         return state
 
     def start_autonomy(self, data):
@@ -55,6 +60,22 @@ class Boat:
         try:
             speed = float(data['speed'])
             self.autonomy.set_speed(speed)
+            return True
+        except KeyError as e:
+            self.logger.warning(e)
+        except ValueError as e:
+            self.logger.warning(e)
+        return False
+
+    def set_pump(self, data):
+        if self.pump is None:
+            return True
+
+        try:
+            active = data['pump_on']
+            timer = data['pump_time']
+            self.pump.set_timer(timer)
+            self.pump.set_pump_state(active)
             return True
         except KeyError as e:
             self.logger.warning(e)
