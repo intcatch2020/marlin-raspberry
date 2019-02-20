@@ -5,6 +5,7 @@ from marlin.MotorController import MotorController
 from marlin.Provider import Provider
 from marlin.BlueBox import BlueBoxSensor, SensorType
 from marlin.BlueBox import BlueBoxPump
+from marlin.Battery import Battery
 
 
 class Boat:
@@ -16,13 +17,13 @@ class Boat:
                         BlueBoxSensor(SensorType.DO),
                         BlueBoxSensor(SensorType.EC),
                         BlueBoxSensor(SensorType.DO_T),
-                        BlueBoxSensor(SensorType.Pressure)]
+                        BlueBoxSensor(SensorType.Pressure),
+                        Battery()]
         self.pump = BlueBoxPump()
         self.motor_controller = MotorController()
         self.autonomy = Provider().get_Autonomy()
 
     def get_state(self):
-        import random
         state = {'sensors': [],
                  'GPS': self.GPS.state,
                  'APS': self.APS.state,
@@ -34,12 +35,6 @@ class Boat:
             sensor_state = sensor.get_state()
             if sensor_state is not None:
                 state['sensors'].append(sensor_state)
-
-        state['sensors'].append(
-                {'name': 'battery', 'unit': 'V', 'value': 15})
-
-        if self.pump is not None:
-            state['pump'] = self.pump.get_state()
 
         return state
 
