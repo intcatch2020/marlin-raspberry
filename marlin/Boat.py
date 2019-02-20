@@ -10,24 +10,24 @@ from marlin.BlueBox import BlueBoxPump
 class Boat:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        #  self.GPS = Provider().get_GPS()
-        #  self.APS = Provider().get_AbsolutePositionSensor()
+        self.GPS = Provider().get_GPS()
+        self.APS = Provider().get_AbsolutePositionSensor()
         self.sensors = [BlueBoxSensor(SensorType.PH),
                         BlueBoxSensor(SensorType.DO),
                         BlueBoxSensor(SensorType.EC),
                         BlueBoxSensor(SensorType.DO_T),
                         BlueBoxSensor(SensorType.Pressure)]
         self.pump = BlueBoxPump()
-        #  self.motor_controller = MotorController()
-        #  self.autonomy = Provider().get_Autonomy()
+        self.motor_controller = MotorController()
+        self.autonomy = Provider().get_Autonomy()
 
     def get_state(self):
         import random
         state = {'sensors': [],
-                 #  'GPS': self.GPS.state,
-                 #  'APS': self.APS.state,
-                 #  'driving_mode': self.motor_controller.driving_mode,
-                 #  'autonomy_speed': self.autonomy.speed
+                 'GPS': self.GPS.state,
+                 'APS': self.APS.state,
+                 'driving_mode': self.motor_controller.driving_mode,
+                 'autonomy_speed': self.autonomy.speed
                  }
 
         for sensor in self.sensors:
