@@ -15,7 +15,8 @@ class Boat:
         self.sensors = [BlueBoxSensor(SensorType.PH),
                         BlueBoxSensor(SensorType.DO),
                         BlueBoxSensor(SensorType.EC),
-                        BlueBoxSensor(SensorType.DO_T)]
+                        BlueBoxSensor(SensorType.DO_T),
+                        BlueBoxSensor(SensorType.Pressure)]
         self.pump = BlueBoxPump()
         #  self.motor_controller = MotorController()
         #  self.autonomy = Provider().get_Autonomy()

@@ -76,7 +76,7 @@ class SensorType(Enum):
     EC_T = 'Temperature EC'
     DO = 'Oxygen'
     DO_T = 'Temperature O2'
-    PRESSURE = 'Pressure'
+    Pressure = 'Pressure'
 
 
 class BlueBoxSensor:
@@ -85,7 +85,7 @@ class BlueBoxSensor:
              SensorType.EC_T: 'C',
              SensorType.DO_T: 'C',
              SensorType.DO: 'mg/l',
-             SensorType.PRESSURE: 'bar'}
+             SensorType.Pressure: 'bar'}
 
     def __init__(self, sensor_type):
         self.value = None
