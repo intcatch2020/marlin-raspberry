@@ -12,10 +12,10 @@ class Boat:
         self.logger = logging.getLogger(__name__)
         #  self.GPS = Provider().get_GPS()
         #  self.APS = Provider().get_AbsolutePositionSensor()
-        #  self.sensors = [BlueBoxSensor(SensorType.PH),
-        #                  BlueBoxSensor(SensorType.DO),
-        #                  BlueBoxSensor(SensorType.EC),
-        #                  BlueBoxSensor(SensorType.DO_T)]
+        self.sensors = [BlueBoxSensor(SensorType.PH),
+                        BlueBoxSensor(SensorType.DO),
+                        BlueBoxSensor(SensorType.EC),
+                        BlueBoxSensor(SensorType.DO_T)]
         self.pump = BlueBoxPump()
         #  self.motor_controller = MotorController()
         #  self.autonomy = Provider().get_Autonomy()

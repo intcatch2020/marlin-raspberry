@@ -21,7 +21,6 @@ class MotorController:
         self.left_motor = None
         self.right_motor = None
         self.controllers = [Provider().get_RC(), Provider().get_Autonomy()]
-        self.Autonomy = None  # Provider.getAutonomy
         if IS_PI:
             self.pi = pigpio.pi()
         self.on = False
