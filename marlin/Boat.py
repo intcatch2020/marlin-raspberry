@@ -4,6 +4,7 @@ import numpy as np
 from marlin.MotorController import MotorController
 from marlin.Provider import Provider
 from marlin.BlueBox import BlueBoxSensor, SensorType, BlueBoxReader
+from marlin.Battery import Battery
 
 
 class Boat:
@@ -14,12 +15,12 @@ class Boat:
         self.sensors = [BlueBoxSensor(SensorType.PH),
                         BlueBoxSensor(SensorType.DO),
                         BlueBoxSensor(SensorType.EC),
-                        BlueBoxSensor(SensorType.DO_T)]
+                        BlueBoxSensor(SensorType.DO_T),
+                        Battery()]
         self.motor_controller = MotorController()
         self.autonomy = Provider().get_Autonomy()
 
     def get_state(self):
-        import random
         state = {'sensors': [],
                  'GPS': self.GPS.state,
                  'APS': self.APS.state,
@@ -30,8 +31,6 @@ class Boat:
             sensor_state = sensor.get_state()
             if sensor_state is not None:
                 state['sensors'].append(sensor_state)
-            state['sensors'].append(
-                    {'name': 'battery', 'unit': 'V', 'value': 15})
         return state
 
     def start_autonomy(self, data):
