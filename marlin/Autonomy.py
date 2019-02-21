@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 import utm
+import time
 
 from marlin.Provider import Provider
 from marlin.utils import closestPointOnLine, directionError
@@ -22,6 +23,7 @@ class Autonomy:
         self.offset = 1
         self.speed = 30
         self.name = 'autonomy'
+        self.off_timestamp = time.time()
 
     def set_coordinates(self, coordinates):
         boat_position = utm.from_latlon(self.GPS.state['lat'],
@@ -54,6 +56,7 @@ class Autonomy:
         self.pid_controller = PID(*self.pid)
 
     def stop(self):
+        self.off_timestamp = time.time()
         self.is_running = False
 
     def is_active(self):
@@ -70,7 +73,7 @@ class Autonomy:
             # check that boat is running and there are point left
             if not self.is_running or self.next_target >= len(self.coordinates):
                 self.logger.info('Last waypoint reached')
-                self.is_running = False
+                self.stop()
                 return {'trust': 0, 'turn': 0, 'scale': 0}
 
             # take first two points
