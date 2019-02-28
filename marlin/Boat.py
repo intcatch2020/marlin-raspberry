@@ -28,7 +28,8 @@ class Boat:
                  'GPS': self.GPS.state,
                  'APS': self.APS.state,
                  'driving_mode': self.motor_controller.driving_mode,
-                 'autonomy_speed': self.autonomy.speed
+                 'autonomy_speed': self.autonomy.speed,
+                 'pump': self.pump.get_state()
                  }
 
         for sensor in self.sensors:
