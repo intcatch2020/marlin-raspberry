@@ -1,6 +1,9 @@
 import numpy as np
 
-from simple_pid import PID
+
+def pointDistance(x, y):
+    d = (x[0]-y[0])**2 + (x[1]-y[1])**2
+    return np.sqrt(d)
 
 
 def clip(x, xmin, xmax):
@@ -19,8 +22,10 @@ def closestPointOnLine(a, b, p, offset=0):
 
     # check if point outside line
     scale = np.dot(result - a, ab) / np.dot(ab, ab)
+    if scale >= 1:
+        return b
 
-    return result, scale
+    return result
 
 
 def directionError(position, goal, direction):
@@ -34,6 +39,7 @@ def directionError(position, goal, direction):
 def headingToVector(heading):
     rad = heading*np.pi/180
     return np.array([np.sin(rad), np.cos(rad)])
+
 
 class SensorExistsException(Exception):
     def __init__(self, sensor_name):

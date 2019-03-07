@@ -4,12 +4,12 @@ import utm
 
 from marlin.Provider import Provider
 from marlin.utils import closestPointOnLine, directionError
-from marlin.utils import clip, headingToVector
+from marlin.utils import clip, headingToVector, pointDistance
 from simple_pid import PID
 
 
 class Autonomy:
-    def __init__(self):
+    def __init__(self, offset=4, min_distance=1):
         self.logger = logging.getLogger(__name__)
         self.is_running = False
         self.pid = (-1, 0, 0.5)
@@ -19,7 +19,8 @@ class Autonomy:
         self.pid_controller = PID(*self.pid)
         self.GPS = Provider().get_GPS()
         self.APS = Provider().get_AbsolutePositionSensor()
-        self.offset = 1
+        self.offset = offset
+        self.min_distance = min_distance
         self.speed = 30
         self.name = 'autonomy'
 
@@ -32,7 +33,7 @@ class Autonomy:
             self.coordinates.append(c)
 
         self.coordinates = np.array(self.coordinates)
-        self.next_target = 1
+        self.next_target = 0
 
     def set_pid(self, pid):
         self.pid = pid
@@ -42,14 +43,6 @@ class Autonomy:
         self.logger.info('set speed to '+str(self.speed))
 
     def start(self):
-        boat_position = utm.from_latlon(self.GPS.state['lat'],
-                                        self.GPS.state['lng'])[:2]
-
-        # if we need to go to first waypoint create line from current position
-        # to the waypoint
-        if self.next_target == 1:
-            self.coordinates[0] = boat_position
-
         self.is_running = True
         self.pid_controller = PID(*self.pid)
 
@@ -60,12 +53,11 @@ class Autonomy:
         return self.is_running
 
     def get_state(self):
-        # if not runninf or reached last point
-
+        # if not running or reached last point
         boat_position = utm.from_latlon(self.GPS.state['lat'],
                                         self.GPS.state['lng'])[:2]
 
-        # if next point is close the boat, reapeat this with successive point
+        # select next waypoint
         while True:
             # check that boat is running and there are point left
             if not self.is_running or self.next_target >= len(self.coordinates):
@@ -73,23 +65,26 @@ class Autonomy:
                 self.is_running = False
                 return {'trust': 0, 'turn': 0, 'scale': 0}
 
-            # take first two points
-            i = max(self.next_target, 1)
-            target_position, line_fraction = closestPointOnLine(
-                    self.coordinates[i-1],
-                    self.coordinates[i],
-                    boat_position, 1)
-
-            # if boat reached point move the the next one and repeat
-            if line_fraction > 1:
-                self.next_target += 1
-            else:
+            # check if we reached waypoint
+            waypoint = self.coordinates[self.next_target]
+            if pointDistance(boat_position, waypoint) > self.min_distance:
                 break
+
+            self.next_target += 1
+
+        target_position = self.coordinates[self.next_target]
+
+        if self.next_target > 0:
+            target_position = closestPointOnLine(
+                self.coordinates[self.next_target],
+                self.coordinates[self.next_target - 1],
+                boat_position, self.offset)
 
         boat_direction = headingToVector(self.APS.state['heading'])
         self.logger.debug(
             'position: {} direction: {} waypoint: {}, number {}'.format(
-                boat_position, boat_direction, self.coordinates[i], i))
+                boat_position, boat_direction,
+                self.coordinates[self.next_target], self.next_target))
 
         error = directionError(boat_position, target_position, boat_direction)
         correction = self.pid_controller(error)
