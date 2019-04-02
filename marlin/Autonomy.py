@@ -9,7 +9,7 @@ from simple_pid import PID
 
 
 class Autonomy:
-    def __init__(self, offset=4, min_distance=1):
+    def __init__(self, offset=4, min_distance=2):
         self.logger = logging.getLogger(__name__)
         self.is_running = False
         self.pid = (-1, 0, 0.5)
@@ -25,9 +25,7 @@ class Autonomy:
         self.name = 'autonomy'
 
     def set_coordinates(self, coordinates):
-        boat_position = utm.from_latlon(self.GPS.state['lat'],
-                                        self.GPS.state['lng'])[:2]
-        self.coordinates = [boat_position]
+        self.coordinates = []
         for lat, lng in coordinates:
             c = utm.from_latlon(lat, lng)[:2]
             self.coordinates.append(c)
@@ -76,8 +74,8 @@ class Autonomy:
 
         if self.next_target > 0:
             target_position = closestPointOnLine(
-                self.coordinates[self.next_target],
                 self.coordinates[self.next_target - 1],
+                self.coordinates[self.next_target],
                 boat_position, self.offset)
 
         boat_direction = headingToVector(self.APS.state['heading'])
@@ -93,3 +91,4 @@ class Autonomy:
         trust = 500 if abs(error) < 1 else 0
         turn = 500 * clip(correction, -1, 1)
         return {'trust': trust, 'turn': turn, 'scale': self.speed/100}
+

@@ -29,6 +29,7 @@ class Boat:
                  'APS': self.APS.state,
                  'driving_mode': self.motor_controller.driving_mode,
                  'autonomy_speed': self.autonomy.speed,
+                 'reached_point': self.autonomy.next_target,
                  'pump': self.pump.get_state()
                  }
 
