@@ -15,8 +15,8 @@ class Provider:
                                  '/dev/arduino')
 
     def get_RC(self):
-        from marlin.RC import RC
-        return self._get_instace('RC', RC)
+        from marlin.RCPi import RCPi
+        return self._get_instace('RC', RCPi, '/dev/rc')
 
     def get_GPS(self):
         from marlin.GPSSensor import GPSSensor
