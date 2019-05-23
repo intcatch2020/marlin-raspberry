@@ -28,13 +28,18 @@ class AbsolutePositionSensor:
         self.loop_thread.start()
 
     def setup(self):
-        if not self.sensor.begin():
-            self.logging.info('Failed to start BNO055 sensor')
+        while 1:
+            try:
+                self.sensor.begin()
+                status, self_test, error = self.sensor.get_system_status()
+                self.logger.info('System status: {0}'.format(status))
+                self.logger.info(
+                    'Self test result (0x0F is normal): 0x{0:02X}'.format(self_test))
+                break
+            except Exception:
+                time.sleep(1)
+        time.sleep(1)
 
-        status, self_test, error = self.sensor.get_system_status()
-        self.logger.info('System status: {0}'.format(status))
-        self.logger.info(
-            'Self test result (0x0F is normal): 0x{0:02X}'.format(self_test))
 
         # Print out an error if system status is in error mode.
         if status == 0x01:
@@ -53,7 +58,7 @@ class AbsolutePositionSensor:
         while not self.stop:
             (self.state['heading'], self.state['roll'],
              self.state['pitch']) = self.sensor.read_euler()
-            self.state['heading'] = (self.state['heading']+90) % 360
+            self.state['heading'] = (self.state['heading']) % 360
             (self.state['sys_cal'], self.state['gyro_cal'],
              self.state['accel_cal'],
              self.state['mag_cal']) = self.sensor.get_calibration_status()
@@ -66,3 +71,15 @@ class AbsolutePositionSensor:
         self.logging.info('closing Absolute Position Sensor')
         self.loop_thread.join()
         self.sensor.close()
+
+if __name__ == '__main__':
+    import time
+    a = AbsolutePositionSensor('/dev/serial0', 18)
+    while True:
+        print('---------------')
+        print(a.sensor.get_calibration_status())
+        time.sleep(1)
+
+    a.stop = True
+
+

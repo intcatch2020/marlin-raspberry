@@ -1,6 +1,8 @@
 import logging
+import time
 import serial
 
+from threading import Thread
 from bitstring import BitArray, InterpretError
 from marlin.utils import clip
 
@@ -22,6 +24,9 @@ class RCPi:
                                     parity=serial.PARITY_EVEN,
                                     stopbits=serial.STOPBITS_ONE)
 
+        self.loop_thread = Thread(target=self.update_loop)
+#        self.loop_thread.start()
+
     def _get_last_frame(self):
         data = self.serial.read_all()
         bits = BitArray(data)
@@ -30,6 +35,35 @@ class RCPi:
             return
         return bits[frames[-2]:frames[-1]]
 
+    def _read_data(frame):
+        if frame is None:
+            return
+        chs = [0]*16
+        bytes_data = [frame[i*8:(i+1)*8] for i in range(2, 24)]
+
+        try:
+            chs[0]  = bytes_data[0].uint       | bytes_data[1].uint  << 8                        & 2047
+            chs[1]  = bytes_data[1].uint  >> 3 | bytes_data[2].uint  << 5                        & 2047
+            chs[2]  = bytes_data[2].uint  >> 6 | bytes_data[3].uint  << 3 | bytes_data[4].uint << 10  & 2047
+            chs[3]  = bytes_data[4].uint  >> 1 | bytes_data[5].uint  << 7                        & 2047
+        except Exception as e:
+            print(e)
+#        chs[4]  = bytes_data[5].uint  >> 4 | bytes_data[6].uint  << 4                        & 2047
+#        chs[5]  = bytes_data[6].uint  >> 7 | bytes_data[7].uint  << 1 | bytes_data[8].uint <<  9  & 2047
+#        chs[6]  = bytes_data[8].uint  >> 2 | bytes_data[9].uint  << 6                        & 2047
+#        chs[7]  = bytes_data[9].uint  >> 5 | bytes_data[10].uint << 3                        & 2047
+#        chs[8]  = bytes_data[11].uint      | bytes_data[12].uint << 8                        & 2047
+#        chs[9]  = bytes_data[12].uint >> 3 | bytes_data[13].uint << 5                        & 2047
+#        chs[10] = bytes_data[13].uint >> 3 | bytes_data[14].uint << 2 | bytes_data[15].uint << 10 & 2047
+#        chs[11] = bytes_data[15].uint >> 3 | bytes_data[16].uint << 7                        & 2047
+#        chs[12] = bytes_data[16].uint >> 3 | bytes_data[17].uint << 4                        & 2047
+#        chs[13] = bytes_data[17].uint >> 3 | bytes_data[18].uint << 1 | bytes_data[19].uint << 9  & 2047
+#        chs[14] = bytes_data[19].uint >> 3 | bytes_data[20].uint << 6                        & 2047
+#        chs[15] = bytes_data[20].uint >> 3 | bytes_data[21].uint << 3                        & 2047
+
+        return chs
+
+    ''' 
     def _read_data(frame):
         if frame is None:
             return
@@ -42,10 +76,13 @@ class RCPi:
             chs[2] = bytes_data[2].uint >> 6 | bytes_data[3].uint << 3 \
                 | bytes_data[4].uint << 10 & 2047
             chs[3] = bytes_data[4].uint >> 1 | bytes_data[5].uint << 7 & 2047
-        except InterpretError:
+        except InterpretError as e:
+            print(e)
             return
 
+        print(chs)
         return chs
+        '''
 
     def rc_to_motor_signal(x):
         signal = (x - 990) * 0.61
@@ -57,25 +94,41 @@ class RCPi:
         # ensure value between -500 and 500
         return clip(signal, -500, 500)
 
-    def get_state(self):
+    def update_state(self):
         data = RCPi._read_data(self._get_last_frame())
 
         if data is not None:
             self.state['trust'] = RCPi.rc_to_motor_signal(data[0])
             self.state['turn'] = RCPi.rc_to_motor_signal(data[1])
             self.state['override'] = data[2] > 990
-            self.state['scale'] = min((data[3] - 172) * 0.00061, 1)
+            self.state['scale'] = clip((data[3] - 172) * 0.00061, 0, 1)
 
+
+    def get_state(self):
+        self.update_state()
         return self.state
 
     def is_active(self):
+        self.update_state()
         return self.state['override']
+
+    def update_loop(self):
+        while True:
+            try:
+                self.update_state()
+                time.sleep(0.05)
+            except Exception as e:
+                print(e)
+                with open('/home/pi/error.log','a') as f:
+                    f.write(e)
+                pass
 
 
 if __name__ == '__main__':
     import time
-    rc = RCPi('/dev/ttyUSB0')
-    for i in range(100):
+    rc = RCPi('/dev/rc')
+    while 1:
+        print(rc.is_active())
         print(rc.get_state())
         time.sleep(0.1)
     
