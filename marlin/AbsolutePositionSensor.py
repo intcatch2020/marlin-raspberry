@@ -39,6 +39,11 @@ class AbsolutePositionSensor:
             except Exception:
                 time.sleep(1)
         time.sleep(1)
+        self.sensor.set_axis_remap(
+                BNO055.AXIS_REMAP_Y,
+                BNO055.AXIS_REMAP_Z,
+                BNO055.AXIS_REMAP_X)
+        time.sleep(1)
 
 
         # Print out an error if system status is in error mode.
@@ -58,7 +63,7 @@ class AbsolutePositionSensor:
         while not self.stop:
             (self.state['heading'], self.state['roll'],
              self.state['pitch']) = self.sensor.read_euler()
-            self.state['heading'] = (self.state['heading']) % 360
+            self.state['heading'] = (self.state['heading']+90) % 360
             (self.state['sys_cal'], self.state['gyro_cal'],
              self.state['accel_cal'],
              self.state['mag_cal']) = self.sensor.get_calibration_status()
