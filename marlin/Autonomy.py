@@ -46,6 +46,7 @@ class Autonomy:
 
     def stop(self):
         self.is_running = False
+        self.next_target = 0
 
     def is_active(self):
         return self.is_running
