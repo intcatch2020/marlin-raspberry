@@ -1,5 +1,6 @@
 import logging
 import gps
+import time
 
 from threading import Thread
 
@@ -10,20 +11,22 @@ class GPSSensor:
         self.session = gps.gps("localhost", "2947")
         self.session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
         self.stop = False
-        self.state = {'lng': 11.02, 'lat': 45.35, 'speed': 0}
+        self.state = {'lng': -1, 'lat': -1, 'speed': 0, 'heading': 0}
         self.loop_thread = Thread(target=self.update_loop)
         self.loop_thread.start()
 
     def update_loop(self):
         while not self.stop:
             report = self.session.next()
-            self.logger.debug(report)
             if hasattr(report, 'lon'):
                 self.state['lng'] = report.lon
             if hasattr(report, 'lat'):
                 self.state['lat'] = report.lat
             if hasattr(report, 'speed'):
                 self.state['speed'] = report.speed
+            if hasattr(report, 'track'):
+                self.state['heading'] = report.track
+            time.sleep(0.1)
 
     def stop(self):
         self.stop = True

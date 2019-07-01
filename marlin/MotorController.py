@@ -9,7 +9,7 @@ RIGHT_MOTOR_PIN = 17
 LEFT_MOTOR_PIN = 27
 MAX_SPEED = 2000
 MIN_SPEED = 1000
-IS_PI = False
+IS_PI = True
 
 if IS_PI:
     import pigpio
@@ -20,7 +20,7 @@ class MotorController:
         self.logger = logging.getLogger(__name__)
         self.left_motor = None
         self.right_motor = None
-        self.controllers = [Provider().get_RC(), Provider().get_Autonomy()]
+        self.controllers = [Provider().get_RC(),Provider().get_Autonomy()]
         if IS_PI:
             self.pi = pigpio.pi()
         self.on = False

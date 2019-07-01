@@ -22,6 +22,10 @@ class Provider:
         from marlin.GPSSensor import GPSSensor
         return self._get_instace('GPS', GPSSensor)
 
+    def get_heading(self):
+        from marlin.HeadingSensor import HeadingSensor
+        return self._get_instace('heading', HeadingSensor)
+
     def get_AbsolutePositionSensor(self):
         from marlin.AbsolutePositionSensor import AbsolutePositionSensor
         return self._get_instace(

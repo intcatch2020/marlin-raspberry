@@ -9,7 +9,7 @@ from simple_pid import PID
 
 
 class Autonomy:
-    def __init__(self, offset=4, min_distance=2):
+    def __init__(self, offset=4, min_distance=5):
         self.logger = logging.getLogger(__name__)
         self.is_running = False
         self.pid = (-1, 0, 0.5)
@@ -31,6 +31,7 @@ class Autonomy:
             self.coordinates.append(c)
 
         self.coordinates = np.array(self.coordinates)
+        self.logger.debug('Set autonomy path to {}'.format(self.coordinates))
         self.next_target = 0
 
     def set_pid(self, pid):
@@ -38,15 +39,17 @@ class Autonomy:
 
     def set_speed(self, speed):
         self.speed = clip(speed, 0, 100)
-        self.logger.info('set speed to '+str(self.speed))
+        self.logger.debug('Set speed to {}'.format(self.speed))
 
     def start(self):
         self.is_running = True
         self.pid_controller = PID(*self.pid)
+        self.logger.info('Start autonomy')
 
     def stop(self):
         self.is_running = False
         self.next_target = 0
+        self.logger.info('Stop autonomy')
 
     def is_active(self):
         return self.is_running
@@ -70,6 +73,7 @@ class Autonomy:
                 break
 
             self.next_target += 1
+            self.logger.debug('Reached target {}'.format(self.next_target-1))
 
         target_position = self.coordinates[self.next_target]
 
@@ -80,16 +84,13 @@ class Autonomy:
                 boat_position, self.offset)
 
         boat_direction = headingToVector(self.APS.state['heading'])
-        self.logger.debug(
-            'position: {} direction: {} waypoint: {}, number {}'.format(
-                boat_position, boat_direction,
-                self.coordinates[self.next_target], self.next_target))
 
         error = directionError(boat_position, target_position, boat_direction)
         correction = self.pid_controller(error)
 
         # if boat is point in opposite direction turn on the spot
-        trust = 500 if abs(error) < 1 else 0
+        trust = 500*(1.0-error) if abs(error) < 0.5 else 0
+        trust = trust * self.speed/100.0
         turn = 500 * clip(correction, -1, 1)
-        return {'trust': trust, 'turn': turn, 'scale': self.speed/100}
+        return {'trust': trust, 'turn': turn, 'scale': 1}
 

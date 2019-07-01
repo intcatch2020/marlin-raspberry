@@ -24,9 +24,6 @@ class RCPi:
                                     parity=serial.PARITY_EVEN,
                                     stopbits=serial.STOPBITS_ONE)
 
-        self.loop_thread = Thread(target=self.update_loop)
-#        self.loop_thread.start()
-
     def _get_last_frame(self):
         data = self.serial.read_all()
         bits = BitArray(data)
@@ -38,16 +35,23 @@ class RCPi:
     def _read_data(frame):
         if frame is None:
             return
-        chs = [0]*16
+        chs = [0,0, False, 0]
         bytes_data = [frame[i*8:(i+1)*8] for i in range(2, 24)]
 
         try:
             chs[0]  = bytes_data[0].uint       | bytes_data[1].uint  << 8                        & 2047
+            chs[0] = RCPi.rc_to_motor_signal(chs[0])
+
             chs[1]  = bytes_data[1].uint  >> 3 | bytes_data[2].uint  << 5                        & 2047
+            chs[1] = RCPi.rc_to_motor_signal(chs[1])
+
             chs[2]  = bytes_data[2].uint  >> 6 | bytes_data[3].uint  << 3 | bytes_data[4].uint << 10  & 2047
+            chs[2] = chs[2] > 990
+
             chs[3]  = bytes_data[4].uint  >> 1 | bytes_data[5].uint  << 7                        & 2047
+            chs[3] = clip((chs[3] - 172) * 0.00061, 0, 1)
         except Exception as e:
-            print(e)
+            self.logger.warning(e)
 #        chs[4]  = bytes_data[5].uint  >> 4 | bytes_data[6].uint  << 4                        & 2047
 #        chs[5]  = bytes_data[6].uint  >> 7 | bytes_data[7].uint  << 1 | bytes_data[8].uint <<  9  & 2047
 #        chs[6]  = bytes_data[8].uint  >> 2 | bytes_data[9].uint  << 6                        & 2047
@@ -63,27 +67,6 @@ class RCPi:
 
         return chs
 
-    ''' 
-    def _read_data(frame):
-        if frame is None:
-            return
-        chs = {}
-        bytes_data = [frame[i*8:(i+1)*8] for i in range(2, 24)]
-
-        try:
-            chs[0] = bytes_data[0].uint | bytes_data[1].uint << 8 & 2047
-            chs[1] = bytes_data[1].uint >> 3 | bytes_data[2].uint << 5 & 2047
-            chs[2] = bytes_data[2].uint >> 6 | bytes_data[3].uint << 3 \
-                | bytes_data[4].uint << 10 & 2047
-            chs[3] = bytes_data[4].uint >> 1 | bytes_data[5].uint << 7 & 2047
-        except InterpretError as e:
-            print(e)
-            return
-
-        print(chs)
-        return chs
-        '''
-
     def rc_to_motor_signal(x):
         signal = (x - 990) * 0.61
 
@@ -98,11 +81,7 @@ class RCPi:
         data = RCPi._read_data(self._get_last_frame())
 
         if data is not None:
-            self.state['trust'] = RCPi.rc_to_motor_signal(data[0])
-            self.state['turn'] = RCPi.rc_to_motor_signal(data[1])
-            self.state['override'] = data[2] > 990
-            self.state['scale'] = clip((data[3] - 172) * 0.00061, 0, 1)
-
+            self.state = dict(zip(['trust','turn','override','scale'], data))
 
     def get_state(self):
         self.update_state()
@@ -118,10 +97,7 @@ class RCPi:
                 self.update_state()
                 time.sleep(0.05)
             except Exception as e:
-                print(e)
-                with open('/home/pi/error.log','a') as f:
-                    f.write(e)
-                pass
+                self.logger.error(e)
 
 
 if __name__ == '__main__':

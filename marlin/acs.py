@@ -27,14 +27,14 @@ class ACS:
         self.pi.set_pull_up_down(self.S2_PIN, pigpio.PUD_OFF)
 
     def update_loop(self):
+        self.logger.info('Start ACS')
         while not self.stop:
             if self.APS.state['mag_cal'] < 3:
-                self.logger.debug('APS state: '+str(self.APS.state))
                 self.calibrate()
             time.sleep(1)
 
     def calibrate(self):
-        self.logger.info('start compass calibration procedure')
+        self.logger.debug('Start compass calibration procedure')
         # move first servo
         self.pi.set_servo_pulsewidth(self.S1_PIN, 1500)
         self.pi.set_servo_pulsewidth(self.S1_PIN, 1000)

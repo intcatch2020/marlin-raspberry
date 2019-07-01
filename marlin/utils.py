@@ -1,4 +1,7 @@
 import numpy as np
+import glob
+import os
+import datetime
 
 
 def pointDistance(x, y):
@@ -44,3 +47,14 @@ def headingToVector(heading):
 class SensorExistsException(Exception):
     def __init__(self, sensor_name):
         super().__init__('sensor {} already exists'.format(sensor_name))
+
+
+def delete_old_log(path, n=100):
+    files = sorted(glob.glob(os.path.join(path,'*.log')))
+    if len(files) > n:
+        for f in files[:len(files)-n]:
+            os.remove(f)
+
+def get_log_name():
+    now = datetime.datetime.now()
+    return now.strftime('%Y%m%d-%H%M%S')+'.log'

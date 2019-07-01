@@ -19,7 +19,6 @@ class Boat:
                         BlueBoxSensor(SensorType.DO_T),
                         BlueBoxSensor(SensorType.Pressure),
                         Battery()]
-        self.pump = BlueBoxPump()
         self.motor_controller = MotorController()
         self.autonomy = Provider().get_Autonomy()
         self.acs = Provider().get_ACS()
@@ -31,7 +30,6 @@ class Boat:
                  'driving_mode': self.motor_controller.driving_mode,
                  'autonomy_speed': self.autonomy.speed,
                  'reached_point': self.autonomy.next_target,
-                 'pump': self.pump.get_state()
                  }
 
         for sensor in self.sensors:
