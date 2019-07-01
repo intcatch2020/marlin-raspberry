@@ -27,6 +27,10 @@ class Provider:
         return self._get_instace(
                 'APS', AbsolutePositionSensor, '/dev/serial0', 18)
 
+    def get_ACS(self):
+        from marlin.acs import ACS
+        return self._get_instace('ACS', ACS)
+
     def get_Boat(self):
         from marlin.Boat import Boat
         return self._get_instace('Boat', Boat)

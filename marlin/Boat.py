@@ -22,6 +22,7 @@ class Boat:
         self.pump = BlueBoxPump()
         self.motor_controller = MotorController()
         self.autonomy = Provider().get_Autonomy()
+        self.acs = Provider().get_ACS()
 
     def get_state(self):
         state = {'sensors': [],
