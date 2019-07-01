@@ -74,8 +74,8 @@ class SensorType(Enum):
     PH = 'pH'
     EC = 'Conductivity'
     EC_T = 'Temperature EC'
-    DO = 'Oxygen'
-    DO_T = 'Temperature O2'
+    DO = 'O2'
+    DO_T = 'Temperature'
     Pressure = 'Pressure'
 
 
