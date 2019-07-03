@@ -8,12 +8,19 @@ from threading import Thread
 class GPSSensor:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.session = gps.gps("localhost", "2947")
-        self.session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-        self.stop = False
         self.state = {'lng': -1, 'lat': -1, 'speed': 0, 'heading': 0}
+        self.stop = False
+
+        try:
+            self.session = gps.gps("localhost", "2947")
+        except OSError as e:
+            self.logger.warning('GPS connection failed')
+            return
+
+        self.session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
         self.loop_thread = Thread(target=self.update_loop)
         self.loop_thread.start()
+        self.logger.info('GPS OK')
 
     def update_loop(self):
         while not self.stop:

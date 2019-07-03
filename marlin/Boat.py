@@ -22,6 +22,7 @@ class Boat:
         self.motor_controller = MotorController()
         self.autonomy = Provider().get_Autonomy()
         self.acs = Provider().get_ACS()
+        self.heading_sensor = Provider().get_heading()
 
     def get_state(self):
         state = {'sensors': [],
@@ -30,6 +31,7 @@ class Boat:
                  'driving_mode': self.motor_controller.driving_mode,
                  'autonomy_speed': self.autonomy.speed,
                  'reached_point': self.autonomy.next_target,
+                 'heading': self.heading_sensor.get_state()['heading'],
                  }
 
         for sensor in self.sensors:

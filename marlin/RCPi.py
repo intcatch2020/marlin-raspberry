@@ -1,6 +1,7 @@
 import logging
 import time
 import serial
+import os
 
 from threading import Thread
 from bitstring import BitArray, InterpretError
@@ -18,11 +19,18 @@ class RCPi:
             'override': True,  # RC override
             'scale': 0,  # throttle scale (0-1)
         }
+
+        if not os.path.exists(port):
+            self.logger.warning('RC device {} not found'.format(port))
+            self.serial = None
+            return
+
         self.serial = serial.Serial(port=port,
                                     baudrate=100000,
                                     bytesize=serial.EIGHTBITS,
                                     parity=serial.PARITY_EVEN,
                                     stopbits=serial.STOPBITS_ONE)
+        self.logger.info('RC OK')
 
     def _get_last_frame(self):
         data = self.serial.read_all()
@@ -84,20 +92,23 @@ class RCPi:
             self.state = dict(zip(['trust','turn','override','scale'], data))
 
     def get_state(self):
-        self.update_state()
+        if self.serial is not None:
+            self.update_state()
+
         return self.state
 
     def is_active(self):
-        self.update_state()
+        if self.serial is not None:
+            self.update_state()
         return self.state['override']
 
-    def update_loop(self):
-        while True:
-            try:
-                self.update_state()
-                time.sleep(0.05)
-            except Exception as e:
-                self.logger.error(e)
+    # def update_loop(self):
+    #     while True:
+    #         try:
+    #             self.update_state()
+    #             time.sleep(0.05)
+    #         except Exception as e:
+    #             self.logger.error(e)
 
 
 if __name__ == '__main__':

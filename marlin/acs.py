@@ -1,6 +1,9 @@
 import logging
 import time
-import pigpio
+import os
+
+if os.getenv('NOPI') is None:
+    import pigpio
 
 from threading import Thread
 from marlin.Provider import Provider
@@ -14,13 +17,17 @@ class ACS:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.stop = False
-        self.pi = pigpio.pi()
+        if os.getenv('NOPI') is None:
+            self.pi = pigpio.pi()
         self.APS = Provider().get_AbsolutePositionSensor()
         self.loop_thread = Thread(target=self.update_loop)
         #self.loop_thread.start()
         self.calibrate()
 
     def setup(self):
+        if os.getenv('NOPI') is not None:
+            return
+
         self.pi.set_mode(self.S1_PIN, pigpio.OUTPUT)
         self.pi.set_mode(self.S2_PIN, pigpio.OUTPUT)
         self.pi.set_pull_up_down(self.S1_PIN, pigpio.PUD_OFF)
@@ -34,6 +41,9 @@ class ACS:
             time.sleep(1)
 
     def calibrate(self):
+        if os.getenv('NOPI') is not None:
+            return
+
         self.logger.debug('Start compass calibration procedure')
         # move first servo
         self.pi.set_servo_pulsewidth(self.S1_PIN, 1500)

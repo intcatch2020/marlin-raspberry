@@ -1,11 +1,18 @@
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--debug', dest='debug', action='store_true', default=False)
+config = parser.parse_args()
+
 import time
 import logging
 import json
 import os
 from marlin.utils import delete_old_log, get_log_name
 
+
 LOG_FOLDER = '/var/marlin/log'
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.INFO if not config.debug else logging.DEBUG
 LOG_FILE = os.path.join(LOG_FOLDER, get_log_name())
 LOG_FORMAT = '%(asctime)-15s  %(levelname)-8s %(name)s: %(message)s'
 

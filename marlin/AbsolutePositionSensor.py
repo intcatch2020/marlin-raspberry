@@ -1,5 +1,6 @@
 import logging
 import time
+import os
 
 from Adafruit_BNO055 import BNO055
 from threading import Thread
@@ -22,6 +23,11 @@ class AbsolutePositionSensor:
             'mag_cal': 0
         }
         self.stop = False
+
+        if os.getenv('NOPI') is not None:
+            self.logger.warning('Absolute Position Sensor not working on this platform')
+            return
+
         self.sensor = BNO055.BNO055(serial_port=port, rst=rst)
         self.setup()
         self.loop_thread = Thread(target=self.update_loop)

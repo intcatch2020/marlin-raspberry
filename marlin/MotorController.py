@@ -1,5 +1,6 @@
 import logging
 import time
+import os
 
 from marlin.Provider import Provider
 from marlin.utils import clip
@@ -9,9 +10,10 @@ RIGHT_MOTOR_PIN = 17
 LEFT_MOTOR_PIN = 27
 MAX_SPEED = 2000
 MIN_SPEED = 1000
-IS_PI = True
+IS_PI = False
 
-if IS_PI:
+
+if os.getenv('NOPI') is None:
     import pigpio
 
 
@@ -21,18 +23,22 @@ class MotorController:
         self.left_motor = None
         self.right_motor = None
         self.controllers = [Provider().get_RC(),Provider().get_Autonomy()]
-        if IS_PI:
-            self.pi = pigpio.pi()
+
+
         self.on = False
         self.stop = False
         self.driving_mode = -1
+
+        if os.getenv('NOPI') is None:
+            self.pi = pigpio.pi()
+
         self.setup()
         self.turn_on()
         self.loop_thread = Thread(target=self.update_loop)
         self.loop_thread.start()
 
     def setup(self):
-        if IS_PI:
+        if os.getenv('NOPI') is None:
             self.pi.set_mode(RIGHT_MOTOR_PIN, pigpio.OUTPUT)
             self.pi.set_mode(LEFT_MOTOR_PIN, pigpio.OUTPUT)
             self.pi.set_pull_up_down(RIGHT_MOTOR_PIN, pigpio.PUD_OFF)
@@ -57,12 +63,12 @@ class MotorController:
         l_speed = clip(l_speed, 1000, 2000)
         r_speed = clip(r_speed, 1000, 2000)
 
-        if IS_PI:
+        if os.getenv('NOPI') is None:
             self.pi.set_servo_pulsewidth(LEFT_MOTOR_PIN, l_speed)
             self.pi.set_servo_pulsewidth(RIGHT_MOTOR_PIN, r_speed)
 
     def turn_on(self):
-        if IS_PI:
+        if os.getenv('NOPI') is None:
             self.pi.set_servo_pulsewidth(RIGHT_MOTOR_PIN, 1500)
             self.pi.set_servo_pulsewidth(LEFT_MOTOR_PIN, 1500)
 
