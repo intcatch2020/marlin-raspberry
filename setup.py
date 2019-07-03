@@ -21,6 +21,11 @@ setuptools.setup(
         'Adafruit-BNO055==1.0.2',
         'utm==0.4.2',
         'bitstring==3.1.5'
-        ]
+        ],
+    entry_points={
+          'console_scripts': [
+              'run = marlin.__main__:main'
+          ]
+      },
 )
 
