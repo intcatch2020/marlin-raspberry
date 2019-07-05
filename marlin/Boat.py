@@ -1,5 +1,6 @@
 import logging
 import numpy as np
+import json
 
 from marlin.MotorController import MotorController
 from marlin.Provider import Provider
@@ -29,9 +30,8 @@ class Boat:
                  'GPS': self.GPS.state,
                  'APS': self.APS.state,
                  'driving_mode': self.motor_controller.driving_mode,
-                 'autonomy_speed': self.autonomy.speed,
-                 'reached_point': self.autonomy.next_target,
-                 'heading': self.heading_sensor.get_state()['heading'],
+                 'heading': self.heading_sensor.get_state(),
+                 'autonomy': self.autonomy.get_info(),
                  }
 
         for sensor in self.sensors:
@@ -43,12 +43,10 @@ class Boat:
 
     def start_autonomy(self, data):
         self.logger.debug(data)
+        data = json.loads(data)
         try:
             path = data['path']
-            coordinates = []
-            for coordinate in path:
-                coordinates.append([coordinate['lat'], coordinate['lng']])
-            self.autonomy.set_coordinates(np.array(coordinates))
+            self.autonomy.set_coordinates(path)
             self.autonomy.start()
             return True
         except KeyError as e:
@@ -60,6 +58,7 @@ class Boat:
         return True
 
     def set_speed(self, data):
+        data = json.loads(data)
         try:
             speed = float(data['speed'])
             self.autonomy.set_speed(speed)

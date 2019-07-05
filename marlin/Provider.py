@@ -45,6 +45,13 @@ class Provider:
         HttpController.register(app)
         return app
 
+    def get_SocketClient(self):
+        from marlin.WebSocketController import SocketIOClient
+        return self._get_instace('socketClient',
+                                 SocketIOClient,
+                                 'localhost',
+                                 5000)
+
     def get_Autonomy(self):
         from marlin.Autonomy import Autonomy
         return self._get_instace('Autonomy', Autonomy)

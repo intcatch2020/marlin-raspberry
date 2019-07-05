@@ -14,20 +14,23 @@ class Autonomy:
         self.is_running = False
         self.pid = (-1, 0, 0.5)
         self.coordinates = np.array([])
+        self.coordinates_lat_long = []
         self.next_target = 0
         self.loop_thread = None
         self.pid_controller = PID(*self.pid)
         self.GPS = Provider().get_GPS()
         self.APS = Provider().get_AbsolutePositionSensor()
+        self.heading_sensor = Provider().get_heading()
         self.offset = offset
         self.min_distance = min_distance
         self.speed = 30
         self.name = 'autonomy'
 
     def set_coordinates(self, coordinates):
+        self.coordinates_lat_long = coordinates
         self.coordinates = []
-        for lat, lng in coordinates:
-            c = utm.from_latlon(lat, lng)[:2]
+        for coord in coordinates:
+            c = utm.from_latlon(coord['lat'], coord['lng'])[:2]
             self.coordinates.append(c)
 
         self.coordinates = np.array(self.coordinates)
@@ -49,10 +52,19 @@ class Autonomy:
     def stop(self):
         self.is_running = False
         self.next_target = 0
+        self.coordinates_lat_long = []
+        self.coordinates = []
         self.logger.info('Stop autonomy')
 
     def is_active(self):
         return self.is_running
+    
+    def get_info(self):
+        return {
+            "speed": self.speed,
+            "reached_point": self.next_target,
+            "waypoints": self.coordinates_lat_long
+        }
 
     def get_state(self):
         # if not running or reached last point
@@ -84,6 +96,7 @@ class Autonomy:
                 boat_position, self.offset)
 
         boat_direction = headingToVector(self.APS.state['heading'])
+        #boat_direction = self.heading_sensor.get_state()['vector_heading']
 
         error = directionError(boat_position, target_position, boat_direction)
         correction = self.pid_controller(error)

@@ -20,7 +20,10 @@ setuptools.setup(
         'pyserial==3.4',
         'Adafruit-BNO055==1.0.2',
         'utm==0.4.2',
-        'bitstring==3.1.5'
+        'bitstring==3.1.5',
+        'python-socketio',
+        'requests',
+        'websocket-client'
         ],
     entry_points={
           'console_scripts': [

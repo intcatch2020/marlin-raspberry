@@ -22,7 +22,7 @@ def main():
     os.makedirs(LOG_FOLDER, exist_ok=True)
     delete_old_log(LOG_FOLDER)
 
-    logging.basicConfig(level=LOG_LEVEL,
+    logging.basicConfig(level=logging.WARNING,
                         filename=LOG_FILE,
                         filemode='w',
                         format=LOG_FORMAT)
@@ -32,12 +32,22 @@ def main():
     console.setFormatter(logging.Formatter(LOG_FORMAT))
     logging.getLogger('').addHandler(console)
 
-    logging.getLogger('Adafruit_BNO055.BNO055').setLevel(logging.INFO)
-    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    logging.getLogger('marlin').setLevel(LOG_LEVEL)
+    # logging.getLogger('Adafruit_BNO055.BNO055').setLevel(logging.INFO)
+    # logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    # logging.getLogger('socketio.client').setLevel(logging.WARNING)
+    # logging.getLogger('engineio.client').setLevel(logging.WARNING)
+    # logging.getLogger('requests').setLevel(logging.INFO)
 
     boat = Provider().get_Boat()
-    app = Provider().get_HttpController()
-    app.run(port=5000, host='0.0.0.0')
+
+    # HTTP
+    # app = Provider().get_HttpController()
+    # app.run(port=5001, host='0.0.0.0')
+
+    # SocketIO
+    socket = Provider().get_SocketClient()
+    socket.start()
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,7 @@ from threading import Thread
 class GPSSensor:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.state = {'lng': -1, 'lat': -1, 'speed': 0, 'heading': 0}
+        self.state = {'fix':0, 'lng': 0, 'lat': 0, 'speed': 0, 'heading': 0}
         self.stop = False
 
         try:
@@ -27,8 +27,10 @@ class GPSSensor:
             report = self.session.next()
             if hasattr(report, 'lon'):
                 self.state['lng'] = report.lon
+                self.state['fix'] = 1
             if hasattr(report, 'lat'):
                 self.state['lat'] = report.lat
+                self.state['fix'] = 1
             if hasattr(report, 'speed'):
                 self.state['speed'] = report.speed
             if hasattr(report, 'track'):
