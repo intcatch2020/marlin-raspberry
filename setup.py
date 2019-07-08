@@ -23,7 +23,9 @@ setuptools.setup(
         'bitstring==3.1.5',
         'python-socketio',
         'requests',
-        'websocket-client'
+        'websocket-client',
+        'PIGPIO',
+        'spidev'
         ],
     entry_points={
           'console_scripts': [
