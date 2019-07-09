@@ -59,7 +59,7 @@ class Provider:
     def get_BlueBoxReader(self):
         from marlin.BlueBox import BlueBoxReader
         return self._get_instace(
-                'BlueBoxReader', BlueBoxReader, '/dev/bluebox')
+                'BlueBoxReader', BlueBoxReader)
 
     def _get_instace(self, key, cls, *args, **kwargs):
         if key not in self.instances:

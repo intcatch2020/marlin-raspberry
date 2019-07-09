@@ -1,5 +1,6 @@
 import logging
 import serial
+import socket
 import time
 import os
 
@@ -8,21 +9,21 @@ from threading import Thread
 from marlin.utils import SensorExistsException
 from marlin.Provider import Provider
 
-
 class BlueBoxReader:
-    def __init__(self, serial_port, boud_rate=38400, timeout=5):
+    def __init__(self, ip='localhost', port=2948, timeout=5):
         self.logger = logging.getLogger(__name__)
-        self.serial_port = serial_port
-        self.boud_rate = boud_rate
         self.sensors = {}
         self.stop = False
+        self.ip = ip
+        self.port = port
 
-        if not os.path.exists(serial_port):
-            self.logger.warning('BlueBox device {} not found'.format(serial_port))
+        try:
+            self.socket_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket_connection.connect((self.ip, self.port))
+        except ConnectionRefusedError:
+            self.logger.warning('BlueBox connection refused at ip {} port {}'.format(self.ip, self.port))
             return
 
-        self.serial_connection = serial.Serial(
-            self.serial_port, self.boud_rate, timeout=timeout)
 
         self.loop_thread = Thread(target=self._read_loop)
         self.loop_thread.start()
@@ -47,19 +48,25 @@ class BlueBoxReader:
             pass
 
     def _read_loop(self):
-        line = ''
+        buffer = ''
         while not self.stop:
-            try:
-                line = self.serial_connection.readline().decode('cp1252')
-                data = line.split(',')
-                sensor_name, sensor, value, unit = data[3:7]
-                self._notify_sensor(sensor_name, float(value))
-            except IndexError as e:
-                self.logger.debug(e)
-            except ValueError as e:
-                self.logger.debug(e)
-            except TypeError as e:
-                self.logger.debug(e)
+            if '\n' in buffer:
+                line, buffer = buffer.split('\n', 1)
+                print('line', line)
+                try:
+                    data = line.split(',')
+                    sensor_name, sensor, value, unit = data[3:7]
+                    self._notify_sensor(sensor_name, float(value))
+                except IndexError as e:
+                    self.logger.debug(e)
+                except ValueError as e:
+                    self.logger.debug(e)
+                except TypeError as e:
+                    self.logger.debug(e)
+            else:
+                more = self.socket_connection.recv(4096).decode('cp1252')
+                if more:
+                    buffer += more
 
     def write(self, data):
         if data[-1] != '\n':
