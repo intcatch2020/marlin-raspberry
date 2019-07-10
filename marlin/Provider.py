@@ -15,17 +15,25 @@ class Provider:
                                  '/dev/arduino')
 
     def get_RC(self):
-        from marlin.RC import RC
-        return self._get_instace('RC', RC)
+        from marlin.RCPi import RCPi
+        return self._get_instace('RC', RCPi, '/dev/rc')
 
     def get_GPS(self):
         from marlin.GPSSensor import GPSSensor
         return self._get_instace('GPS', GPSSensor)
 
+    def get_heading(self):
+        from marlin.HeadingSensor import HeadingSensor
+        return self._get_instace('heading', HeadingSensor)
+
     def get_AbsolutePositionSensor(self):
         from marlin.AbsolutePositionSensor import AbsolutePositionSensor
         return self._get_instace(
-                'APS', AbsolutePositionSensor, '/dev/serial0', None)
+                'APS', AbsolutePositionSensor, '/dev/serial0', 18)
+
+    def get_ACS(self):
+        from marlin.acs import ACS
+        return self._get_instace('ACS', ACS)
 
     def get_Boat(self):
         from marlin.Boat import Boat
@@ -36,6 +44,13 @@ class Provider:
         app = Flask(__name__)
         HttpController.register(app)
         return app
+
+    def get_SocketClient(self):
+        from marlin.WebSocketController import SocketIOClient
+        return self._get_instace('socketClient',
+                                 SocketIOClient,
+                                 'localhost',
+                                 5000)
 
     def get_Autonomy(self):
         from marlin.Autonomy import Autonomy

@@ -1,6 +1,12 @@
 import numpy as np
+import glob
+import os
+import datetime
 
-from simple_pid import PID
+
+def pointDistance(x, y):
+    d = (x[0]-y[0])**2 + (x[1]-y[1])**2
+    return np.sqrt(d)
 
 
 def clip(x, xmin, xmax):
@@ -19,8 +25,10 @@ def closestPointOnLine(a, b, p, offset=0):
 
     # check if point outside line
     scale = np.dot(result - a, ab) / np.dot(ab, ab)
+    if scale >= 1:
+        return b
 
-    return result, scale
+    return result
 
 
 def directionError(position, goal, direction):
@@ -39,3 +47,14 @@ def headingToVector(heading):
 class SensorExistsException(Exception):
     def __init__(self, sensor_name):
         super().__init__('sensor {} already exists'.format(sensor_name))
+
+
+def delete_old_log(path, n=100):
+    files = sorted(glob.glob(os.path.join(path,'*.log')))
+    if len(files) > n:
+        for f in files[:len(files)-n]:
+            os.remove(f)
+
+def get_log_name():
+    now = datetime.datetime.now()
+    return now.strftime('%Y%m%d-%H%M%S')+'.log'

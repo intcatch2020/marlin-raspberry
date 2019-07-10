@@ -5,7 +5,6 @@ from marlin.Provider import Provider
 VERSION = "0.0.1"
 
 
-
 class HttpController(FlaskView):
     route_base = '/'
     boat = Provider().get_Boat()
@@ -44,6 +43,16 @@ class HttpController(FlaskView):
     def set_speed(self):
         data = request.get_json()
         if self.boat.set_speed(data):
+            return jsonify({'status': 'OK'})
+        else:
+            response = jsonify({'status': 'ERROR'})
+            response.status_code = 503
+            return response
+
+    @route('/pump', methods=['POST'])
+    def pump(self):
+        data = request.get_json()
+        if self.boat.set_pump(data):
             return jsonify({'status': 'OK'})
         else:
             response = jsonify({'status': 'ERROR'})
