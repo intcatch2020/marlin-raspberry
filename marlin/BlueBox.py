@@ -52,7 +52,6 @@ class BlueBoxReader:
         while not self.stop:
             if '\n' in buffer:
                 line, buffer = buffer.split('\n', 1)
-                print('line', line)
                 try:
                     data = line.split(',')
                     sensor_name, sensor, value, unit = data[3:7]
