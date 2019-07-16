@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 import time
 
 from threading import Thread
@@ -15,8 +16,11 @@ class DataLogger:
     def log_loop(self):
         print('start logger')
         while True:
-            self.logger.info(self.boat.get_state())
+            state = self.boat.get_state()
+            state['timestamp'] = datetime.now().timestamp()
+            self.logger.info()
             time.sleep(1)
+            
             
 
 

@@ -1,4 +1,5 @@
 import logging
+import datetime
 import time
 import os
 
@@ -67,7 +68,9 @@ class MotorController:
         r_speed = clip(r_speed, 1000, 2000)
 
         data = {'left_motor':(l_speed-1500)/500,
-                'right_motor':(r_speed-1500)/500}
+                'right_motor':(r_speed-1500)/500,
+                'timestamp':datetime.now().timestamp()}
+
         self.dataLogger.info(data)
 
         if os.getenv('NOPI') is None:
