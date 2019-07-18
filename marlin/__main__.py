@@ -48,12 +48,12 @@ def main():
     dataLogger = DataLogger()
 
     # HTTP
-    app = Provider().get_HttpController()
-    app.run(port=5000, host='0.0.0.0')
+    # app = Provider().get_HttpController()
+    # app.run(port=5000, host='0.0.0.0')
 
     # SocketIO
-    # socket = Provider().get_SocketClient()
-    # socket.start()
+    socket = Provider().get_SocketClient()
+    socket.start()
 
 if __name__ == "__main__":
     main()

@@ -35,6 +35,7 @@ class HeadingSensor:
 
         # calculate heading using kalman filter
         heading = self.kf.predict(new_heading - self.old_heading)[0][0]
+        self.old_heading = new_heading
         
         # normalize heading
         heading = heading % 360
@@ -49,6 +50,6 @@ class HeadingSensor:
             if gps_heading - heading < -180:
                 gps_heading += 360
 
-            self.kf.update(np.array([[self.GPS.state['heading']]]))
+            self.kf.update(np.array([[gps_heading]]))
 
         return heading 

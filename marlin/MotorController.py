@@ -1,11 +1,11 @@
 import logging
-import datetime
 import time
 import os
 
 from marlin.Provider import Provider
 from marlin.utils import clip
 from threading import Thread
+from datetime import datetime
 
 RIGHT_MOTOR_PIN = 17
 LEFT_MOTOR_PIN = 27
