@@ -61,6 +61,11 @@ class Provider:
         return self._get_instace(
                 'BlueBoxReader', BlueBoxReader, '/dev/bluebox')
 
+    def get_MotorController(self):
+        from marlin.MotorController import MotorController
+        return self._get_instace(
+                'MotorController', MotorController)
+
     def _get_instace(self, key, cls, *args, **kwargs):
         if key not in self.instances:
             self.instances[key] = cls(*args, **kwargs)

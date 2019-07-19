@@ -18,7 +18,7 @@ class DataLogger:
         while True:
             state = self.boat.get_state()
             state['timestamp'] = datetime.now().timestamp()
-            self.logger.info()
+            self.logger.info(state)
             time.sleep(1)
             
             

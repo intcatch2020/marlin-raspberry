@@ -41,9 +41,15 @@ class HeadingSensor:
         heading = heading % 360
         self.kf.x = np.array([[heading]])
 
+        motor_controller = Provider().get_MotorController()
+
+        # avoid division by zero
+        is_going_straight = motor_controller.state['speed']/(np.abs(motor_controller.state['turn'])+0.0000001)
+        is_going_straight = is_going_straight > 1.5
+
 
         # adjust kalman filter using GPS heading if boat is moving
-        if self.GPS.state['speed'] > 1.0:
+        if is_going_straight and self.GPS.state['speed'] > 0.5:
             gps_heading = self.GPS.state['heading']
             if gps_heading - heading > 180:
                 gps_heading -= 360
