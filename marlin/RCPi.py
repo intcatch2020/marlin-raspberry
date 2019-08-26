@@ -31,8 +31,18 @@ class RCPi:
                                     parity=serial.PARITY_EVEN,
                                     stopbits=serial.STOPBITS_ONE)
         self.logger.info('RC OK')
+    
+    def read_all(self):
+        buffer = []
+        while True:
+            data = self.serial.read(10000)
+            buffer += data
+            if len(data) < 10000:
+                break
+        return buffer
 
     def _get_last_frame(self):
+        #data = self.read_all()
         data = self.serial.read_all()
         bits = BitArray(data)
         frames = list(bits.findall(BitArray(hex='000f')))
@@ -40,7 +50,7 @@ class RCPi:
             return
         return bits[frames[-2]:frames[-1]]
 
-    def _read_data(frame):
+    def _read_data(self, frame):
         if frame is None:
             return
         chs = [0,0, False, 0]
@@ -86,7 +96,7 @@ class RCPi:
         return clip(signal, -500, 500)
 
     def update_state(self):
-        data = RCPi._read_data(self._get_last_frame())
+        data = self._read_data(self._get_last_frame())
 
         if data is not None:
             self.state = dict(zip(['trust','turn','override','scale'], data))

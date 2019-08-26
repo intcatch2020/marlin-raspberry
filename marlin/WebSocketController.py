@@ -25,6 +25,16 @@ class SocketController(socketio.ClientNamespace):
 
     def on_set_speed(self, data):
         self.boat.set_speed(data)
+
+    def on_set_heading(self, data):
+        import json
+        try:
+            data = json.loads(data)
+            Provider().get_heading().set_heading(data['heading'])
+        except KeyError as e:
+            pass
+        except ValueError as e:
+            pass
     
     def on_disconnect(self):
         self.is_connected = False

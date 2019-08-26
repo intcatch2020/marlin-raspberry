@@ -95,8 +95,8 @@ class Autonomy:
                 self.coordinates[self.next_target],
                 boat_position, self.offset)
 
-        boat_direction = headingToVector(self.APS.state['heading'])
-        #boat_direction = self.heading_sensor.get_state()['vector_heading']
+        #boat_direction = headingToVector(self.APS.state['heading'])
+        boat_direction = headingToVector(self.heading_sensor.get_state())
 
         error = directionError(boat_position, target_position, boat_direction)
         correction = self.pid_controller(error)
