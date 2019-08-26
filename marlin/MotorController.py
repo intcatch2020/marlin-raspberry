@@ -5,6 +5,7 @@ import os
 from marlin.Provider import Provider
 from marlin.utils import clip
 from threading import Thread
+from datetime import datetime
 
 RIGHT_MOTOR_PIN = 17
 LEFT_MOTOR_PIN = 27
@@ -20,6 +21,7 @@ if os.getenv('NOPI') is None:
 class MotorController:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.dataLogger = logging.getLogger('data')
         self.left_motor = None
         self.right_motor = None
         self.controllers = [Provider().get_RC(),Provider().get_Autonomy()]
@@ -28,6 +30,7 @@ class MotorController:
         self.on = False
         self.stop = False
         self.driving_mode = -1
+        self.state = {'speed': 0, 'turn': 0, 'scale': 0}
 
         if os.getenv('NOPI') is None:
             self.pi = pigpio.pi()
@@ -45,6 +48,7 @@ class MotorController:
             self.pi.set_pull_up_down(LEFT_MOTOR_PIN, pigpio.PUD_OFF)
 
     def set_engine_state(self, speed, turn, scale):
+        self.state = {'speed': speed, 'turn': turn, 'scale': scale}
         l_speed = r_speed = speed
         l_speed += turn / 2
         r_speed -= turn / 2
@@ -62,6 +66,12 @@ class MotorController:
         r_speed = (r_speed - offset) * scale + 1500
         l_speed = clip(l_speed, 1000, 2000)
         r_speed = clip(r_speed, 1000, 2000)
+
+        data = {'left_motor':(l_speed-1500)/500,
+                'right_motor':(r_speed-1500)/500,
+                'timestamp':datetime.now().timestamp()}
+
+        self.dataLogger.info(data)
 
         if os.getenv('NOPI') is None:
             self.pi.set_servo_pulsewidth(LEFT_MOTOR_PIN, l_speed)

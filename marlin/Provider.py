@@ -2,11 +2,13 @@ import logging
 
 from singleton_decorator import singleton
 from flask import Flask, jsonify, make_response
+from threading import Lock
 
 
 @singleton
 class Provider:
     def __init__(self):
+        self.mutex = {'RC':Lock(), 'MotorController':Lock(), 'APS':Lock()}
         self.instances = {}
 
     def get_ArduinoSerialParser(self):
@@ -15,8 +17,11 @@ class Provider:
                                  '/dev/arduino')
 
     def get_RC(self):
+        self.mutex['RC'].acquire()
         from marlin.RCPi import RCPi
-        return self._get_instace('RC', RCPi, '/dev/rc')
+        rc = self._get_instace('RC', RCPi, '/dev/rc')
+        self.mutex['RC'].release()
+        return  rc
 
     def get_GPS(self):
         from marlin.GPSSensor import GPSSensor
@@ -27,9 +32,12 @@ class Provider:
         return self._get_instace('heading', HeadingSensor)
 
     def get_AbsolutePositionSensor(self):
+        self.mutex['APS'].acquire()
         from marlin.AbsolutePositionSensor import AbsolutePositionSensor
-        return self._get_instace(
+        aps = self._get_instace(
                 'APS', AbsolutePositionSensor, '/dev/serial0', 18)
+        self.mutex['APS'].release()
+        return aps
 
     def get_ACS(self):
         from marlin.acs import ACS
@@ -60,6 +68,14 @@ class Provider:
         from marlin.BlueBox import BlueBoxReader
         return self._get_instace(
                 'BlueBoxReader', BlueBoxReader, '/dev/bluebox')
+
+    def get_MotorController(self):
+        self.mutex['MotorController'].acquire()
+        from marlin.MotorController import MotorController
+        mc = self._get_instace(
+                'MotorController', MotorController)
+        self.mutex['MotorController'].release()
+        return mc
 
     def _get_instace(self, key, cls, *args, **kwargs):
         if key not in self.instances:

@@ -20,10 +20,10 @@ class Boat:
                         BlueBoxSensor(SensorType.DO_T),
                         BlueBoxSensor(SensorType.Pressure),
                         Battery()]
-        self.motor_controller = MotorController()
+        self.heading_sensor = Provider().get_heading()
+        self.motor_controller = Provider().get_MotorController()
         self.autonomy = Provider().get_Autonomy()
         self.acs = Provider().get_ACS()
-        self.heading_sensor = Provider().get_heading()
 
     def get_state(self):
         state = {'sensors': [],
