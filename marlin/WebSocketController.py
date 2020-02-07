@@ -1,6 +1,7 @@
 import socketio
 import time
 from threading import Thread
+from socketio.exceptions import ConnectionError
 
 from marlin.Provider import Provider
 
@@ -38,6 +39,12 @@ class SocketController(socketio.ClientNamespace):
     
     def on_disconnect(self):
         self.is_connected = False
+
+    def on_go_home(self, data):
+        self.boat.go_home()
+    
+    def on_set_home(self, data):
+        self.boat.set_home(data)
     
     def update_loop(self):
         while(True):
@@ -49,7 +56,14 @@ class SocketIOClient():
     def __init__(self, ip='localhost', port=5000):
         self.sio = socketio.Client()
         self.sio.register_namespace(SocketController())
-        self.sio.connect('http://{}:{}'.format(ip, port))
+        while True:
+            try:
+                self.sio.connect('http://{}:{}'.format(ip, port))
+                break
+            except ConnectionError as e:
+                time.sleep(1)
+                continue
+            break
     
     def start(self):
         self.sio.wait()

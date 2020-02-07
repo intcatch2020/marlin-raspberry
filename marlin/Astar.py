@@ -3,9 +3,11 @@ from sortedcontainers import SortedList
 
 
 class Node:
-    def __init__(self, x, y):
+    def __init__(self, x, y, lat=None, lng=None):
         self.x = x
         self.y = y
+        self.lat = lat
+        self.lng = lng
         self.distance = float('inf')
 
     def get_distance(self, b):
@@ -63,8 +65,14 @@ class Path:
     def __eq__(self, p):
         return self.euristic_length == p.euristic_length
 
+def reset_graph_distances(graph):
+    for x in graph.keys():
+        for y in graph[x].keys():
+            if graph[x][y] is not None:
+                graph[x][y].distance = float('inf')
 
 def A_star(start, end, graph):
+    reset_graph_distances(graph)
     paths = SortedList()
     start.distance = 0
     paths.add(Path([start], 0, end))

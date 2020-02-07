@@ -57,12 +57,18 @@ class Provider:
         from marlin.WebSocketController import SocketIOClient
         return self._get_instace('socketClient',
                                  SocketIOClient,
-                                 'localhost',
-                                 5000)
+                                 'wais.intcatch.eu',
+                                 4000)
+                                 #'wais.intcatch.eu',
+                                 #4000)
 
     def get_Autonomy(self):
         from marlin.Autonomy import Autonomy
         return self._get_instace('Autonomy', Autonomy)
+    
+    def get_GoHome(self):
+        from marlin.GoHome import GoHome
+        return self._get_instace('GoHome', GoHome)
 
     def get_BlueBoxReader(self):
         from marlin.BlueBox import BlueBoxReader

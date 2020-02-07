@@ -26,9 +26,11 @@ class Autonomy:
         self.min_distance = min_distance
         self.speed = 30
         self.name = 'autonomy'
+        self.is_go_home = False
         self.off_timestamp = time.time()
 
-    def set_coordinates(self, coordinates):
+    def set_coordinates(self, coordinates, is_go_home=False):
+        self.is_go_home = is_go_home
         self.coordinates_lat_long = coordinates
         self.coordinates = []
         for coord in coordinates:
@@ -57,10 +59,17 @@ class Autonomy:
         self.next_target = 0
         self.coordinates_lat_long = []
         self.coordinates = []
+        self.is_go_home = False
         self.logger.info('Stop autonomy')
 
     def is_active(self):
         return self.is_running
+
+    def get_id(self):
+        if self.is_go_home:
+            return 2
+        else: 
+            return 1
     
     def get_info(self):
         return {
@@ -92,7 +101,7 @@ class Autonomy:
 
         target_position = self.coordinates[self.next_target]
 
-        if self.next_target > 0:
+        if not self.is_go_home and self.next_target > 0:
             target_position = closestPointOnLine(
                 self.coordinates[self.next_target - 1],
                 self.coordinates[self.next_target],

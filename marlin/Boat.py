@@ -23,6 +23,7 @@ class Boat:
         self.heading_sensor = Provider().get_heading()
         self.motor_controller = Provider().get_MotorController()
         self.autonomy = Provider().get_Autonomy()
+        self.goHome = Provider().get_GoHome()
         self.acs = Provider().get_ACS()
 
     def get_state(self):
@@ -62,6 +63,22 @@ class Boat:
         try:
             speed = float(data['speed'])
             self.autonomy.set_speed(speed)
+            return True
+        except KeyError as e:
+            self.logger.warning(e)
+        except ValueError as e:
+            self.logger.warning(e)
+        return False
+    
+    def go_home(self):
+        self.goHome.start()
+    
+    def set_home(self, data):
+        data = json.loads(data)
+        try:
+            lat = float(data['lat'])
+            lng = float(data['lng'])
+            self.goHome.set_home(lat, lng)
             return True
         except KeyError as e:
             self.logger.warning(e)

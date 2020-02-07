@@ -25,12 +25,20 @@ class RCPi:
             self.serial = None
             return
 
-        self.serial = serial.Serial(port=port,
-                                    baudrate=100000,
-                                    bytesize=serial.EIGHTBITS,
-                                    parity=serial.PARITY_EVEN,
-                                    stopbits=serial.STOPBITS_ONE)
+        self.connect_serial(self.port)
         self.logger.info('RC OK')
+
+    def connect_serial(self, port):
+        try:
+            self.serial = serial.Serial(port=port,
+                                        baudrate=100000,
+                                        bytesize=serial.EIGHTBITS,
+                                        parity=serial.PARITY_EVEN,
+                                        stopbits=serial.STOPBITS_ONE)
+        except Exception as e:
+            self.logger.warning(e)
+
+
     
     def read_all(self):
         buffer = []
@@ -40,6 +48,9 @@ class RCPi:
             if len(data) < 10000:
                 break
         return buffer
+
+    def get_id(self):
+        return 0
 
     def _get_last_frame(self):
         #data = self.read_all()
@@ -96,7 +107,12 @@ class RCPi:
         return clip(signal, -500, 500)
 
     def update_state(self):
-        data = self._read_data(self._get_last_frame())
+        try:
+            data = self._read_data(self._get_last_frame())
+        except Exception as e:
+            self.logger.warning(e)
+            self.connect_serial(self.port)
+            data = [0,0,False,0]
 
         if data is not None:
             self.state = dict(zip(['trust','turn','override','scale'], data))
@@ -123,7 +139,7 @@ class RCPi:
 
 if __name__ == '__main__':
     import time
-    rc = RCPi('/dev/rc')
+    rc = RCPi('/dev/ttyUSB0')
     while 1:
         print(rc.is_active())
         print(rc.get_state())

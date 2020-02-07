@@ -48,3 +48,6 @@ class RC:
 
     def is_active(self):
         return self.state['override']
+    
+    def get_id(self):
+        return 0

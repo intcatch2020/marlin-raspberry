@@ -89,14 +89,14 @@ class MotorController:
     def update_loop(self):
         while not self.stop:
             active_controller = False
-            for i, controller in enumerate(self.controllers):
+            for controller in self.controllers:
                 if controller.is_active():
                     state = controller.get_state()
                     self.set_engine_state(state['trust'],
                                           state['turn'],
                                           state['scale'])
                     active_controller = True
-                    self.driving_mode = i
+                    self.driving_mode = controller.get_id()
                     break
             if not active_controller:
                     self.set_engine_state(0, 0, 0)

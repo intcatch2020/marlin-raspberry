@@ -84,6 +84,11 @@ class SensorType(Enum):
     DO = 'O2'
     DO_T = 'Temperature'
     Pressure = 'Pressure'
+    TOC = 'TOC'
+    COD = 'COD'
+    NH4N = 'NH4-N'
+    NO3N = 'NO3-N'
+    PO4P = 'PO4-P'
 
 
 class BlueBoxSensor:
@@ -92,6 +97,11 @@ class BlueBoxSensor:
              SensorType.EC_T: 'C',
              SensorType.DO_T: 'C',
              SensorType.DO: 'mg/l',
+             SensorType.TOC: 'mg/l',
+             SensorType.COD: 'mg/l',
+             SensorType.NH4N: 'mg/l',
+             SensorType.NO3N: 'mg/l',
+             SensorType.PO4P: 'mg/l',
              SensorType.Pressure: 'bar'}
 
     def __init__(self, sensor_type):
